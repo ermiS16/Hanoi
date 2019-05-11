@@ -7,39 +7,39 @@ package logic.hanoi;
  * @version 1.0
  */
 public class Plate {
-	private int width;
+	private int value;
 	private boolean ghost;
 	
 	
 	/**
 	 * Creates a new plate.
 	 * 
-	 * @param width - the width of this plate.
+	 * @param value - the value of this plate.
 	 */
-	public Plate(int width) {
-		this.width = width;
+	public Plate(int value) {
+		this.value = value;
 		this.ghost = false;
 	}
 	
 	/**
 	 * Creates a new plate.
 	 * 
-	 * @param width - the width of the new plate.
+	 * @param value - the value of the new plate.
 	 * @param ghost - if true, this is marked as a ghost plate.
 	 */
-	private Plate(int width, boolean ghost) {
-		this.width = width;
+	private Plate(int value, boolean ghost) {
+		this.value = value;
 		this.ghost = ghost;
 	}
 	
 	
 	/**
-	 * Gets the width of this plate.
+	 * Gets the value of this plate.
 	 * 
-	 * @return the width of this plate.
+	 * @return the value of this plate.
 	 */
-	public int getWidth() {
-		return width;
+	public int getValue() {
+		return value;
 	}
 	
 	/**
@@ -58,6 +58,6 @@ public class Plate {
 	 * @return a new ghost plate with same width.
 	 */
 	public Plate ghostClone() {
-		return new Plate(width, true);
+		return new Plate(value, true);
 	}
 }

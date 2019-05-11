@@ -19,14 +19,13 @@ public class Tower {
 		public int compare(Plate o1, Plate o2) {
 			//o1 - o2 <=> sort from thin to thick
 			//o2 - o1 <=> sort from thick to thin
-			return o2.getWidth() - o1.getWidth();
+			return o2.getValue() - o1.getValue();
 		}
 	};
 	
 	private int numberSystem;
 	private List<Plate> platesOnThisTower;
-
-	private int[] valueCount;
+	
 	private int value;
 	private String representation;
 	
@@ -43,8 +42,6 @@ public class Tower {
 		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
 		
-		this.valueCount = new int[height];
-		
 		//if initWidthPlates is true, create plates for this tower
 		if (initWithPlates) {
 			//create for each height...
@@ -54,13 +51,8 @@ public class Tower {
 					//create a new plate from biggest to smallest
 					this.platesOnThisTower.add(new Plate(y));
 				}
-				
-				this.valueCount[y] = numberSystem - 1;
 			}
 		}
-		
-		//sort plates into correct order
-		sortPlates();
 		
 		//calculate representation and value of this tower
 		recalculate();
@@ -104,9 +96,11 @@ public class Tower {
 	
 	/**
 	 * Recalculates value and representation of this tower. Should be called after every time plates are added or
-	 * removed.
+	 * removed. This method calls sortPlates().
 	 */
 	private void recalculate() {
+		sortPlates();
+		
 		this.value = 0;
 		
 		//if the tower is empty, the value stays zero and the representation is set accordingly
@@ -116,19 +110,24 @@ public class Tower {
 		}
 		
 		//otherwise, start calculating value and representation
-		StringBuilder representationBuilder = new StringBuilder(this.valueCount.length);
-		StringBuilder pendingRepresenationBuilder = new StringBuilder(this.valueCount.length);
+		int msbValue = platesOnThisTower.get(0).getValue();
+		int[] valueCount = new int[msbValue];
 		
-		for (int i = 0; i < valueCount.length; i++) {
-			this.value += this.valueCount[i] * Math.pow(this.numberSystem, i);
-			pendingRepresenationBuilder.append(this.valueCount[i]);
-			
-			if (this.valueCount[i] != 0) {
-				representationBuilder.append(pendingRepresenationBuilder);
-				pendingRepresenationBuilder.delete(0, i);
-			}
+		for (Plate p : platesOnThisTower) {
+			valueCount[p.getValue()] += 1;
 		}
 		
-		this.representation = representationBuilder.toString();
+		StringBuilder representationBuilder = new StringBuilder(msbValue);
+		
+		for (int i = 0; i < msbValue; i++) {
+			//add value of one digit
+			this.value += valueCount[i] * Math.pow(this.numberSystem, i);
+			
+			//add to representation
+			representationBuilder.append(valueCount[i]);
+		}
+		
+		//save representation (and remove leading zeros)
+		this.representation = representationBuilder.reverse().toString().replaceFirst("^0+", "");
 	}
 }
