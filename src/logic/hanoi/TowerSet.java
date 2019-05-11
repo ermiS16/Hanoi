@@ -11,22 +11,28 @@ public class TowerSet {
 	private Tower[] towers;
 	
 	/**
-	 * Creates a new set of Hanoi towers. The amount of towers default to three.
+	 * Creates a new set of Hanoi towers. The amount of towers default to three, the tower height to three and the
+	 * dimension to one.
 	 */
 	public TowerSet() {
-		this(3);
+		this(3, 3, 1);
 	}
 	
 	/**
 	 * Creates a new set of Hanoi towers.
 	 * 
 	 * @param towerAmount - the amount of towers in this set.
+	 * @param towerHeight - the initial height of the tower that is initialized with plates.
+	 * @param dimension - the amount of plates per width level.
+	 * 
+	 * Mind that there is a totl of towerHeight * dimension plates (plus potential ghost plates). The first tower will
+	 * have all plates, all other towers none.
 	 */
-	public TowerSet(int towerAmount) {
+	public TowerSet(int towerAmount, int towerHeight, int dimension) {
 		this.towers = new Tower[towerAmount];
 		
 		for (int i = 0; i < towers.length; i++) {
-			this.towers[i] = new Tower();
+			this.towers[i] = new Tower(towerHeight, dimension, i == 0);
 		}
 	}
 	
