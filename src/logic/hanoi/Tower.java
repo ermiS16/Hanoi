@@ -30,6 +30,15 @@ public class Tower {
 	private int value;
 	private String representation;
 	
+	/**
+	 * Creates a new Hanoi tower.
+	 * 
+	 * @param height - the amount of plate sizes.
+	 * @param numberSystem - the number system this tower calculates in (for value and representation calculation).
+	 * @param initWithPlates - pass true if this tower should initialize with plates. If so, there will be
+	 * numberSystem - 1 plates per width and height different widths, for a total of (numberSystem - 1) * height
+	 * plates.
+	 */
 	public Tower(int height, int numberSystem, boolean initWithPlates) {
 		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();

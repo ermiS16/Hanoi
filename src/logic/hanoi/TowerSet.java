@@ -11,11 +11,11 @@ public class TowerSet {
 	private Tower[] towers;
 	
 	/**
-	 * Creates a new set of Hanoi towers. The amount of towers default to three, the tower height to three and the
-	 * dimension to one.
+	 * Creates a new set of Hanoi towers. The amount of towers default to 3, the tower height to 3 and the
+	 * number system to binary (2).
 	 */
 	public TowerSet() {
-		this(3, 3, 1);
+		this(3, 3, 2);
 	}
 	
 	/**
