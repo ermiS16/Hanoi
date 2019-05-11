@@ -2,6 +2,7 @@ package logic.hanoi;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,11 +43,11 @@ public class Tower {
 		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
 		
-		//if initWidthPlates is true, create plates for this tower
+		//if initWithPlates is true, create plates for this tower
 		if (initWithPlates) {
 			//create for each height...
 			for (int y = 0; y < height; y++) {
-				//...dimensions times a plate
+				//...(numberSystem - 1) times a plate
 				for (int d = 0; d < numberSystem - 1; d++) {
 					//create a new plate from biggest to smallest
 					this.platesOnThisTower.add(new Plate(y));
@@ -84,6 +85,138 @@ public class Tower {
 	 */
 	public String getRepresentation() {
 		return representation;
+	}
+	
+	/**
+	 * Gets the value of the plate with the lowest value that isn't a ghost.
+	 * 
+	 * @return the value of the least worth plate or, if this tower has no plates, the number system, which is higher
+	 * than any plate value.
+	 */
+	public int getLSBAValue() {
+		if (platesOnThisTower.isEmpty()) {
+			return numberSystem;
+		}
+		
+		int lowest = numberSystem;
+		
+		for (Plate plate : platesOnThisTower) {
+			if (plate.getValue() < lowest) {
+				lowest = plate.getValue();
+			}
+		}
+		
+		return lowest;
+	}
+	
+	
+	/**
+	 * Moves the top plates of this tower to another tower.
+	 * 
+	 * @param to - the tower to move plates to.
+	 * @param amount - the amount of plates to move.
+	 * 
+	 * @return true if the move was successful, false if there was a problem (there are not enough plates of the
+	 * smallest type on this tower or the to-tower has a smaller plate at the top). In such a case, no tower will be
+	 * updated.
+	 */
+	public boolean movePlates(Tower to, int amount) {
+		int lsba = getLSBAValue();
+		
+		//if the smallest plate on the receiving tower is smaller than this lsba, this can't be done
+		if (lsba > to.getLSBAValue()) {
+			return false;
+		}
+		
+		//check if enough plates can be removed
+		if (hasOfValue(lsba, amount + 1)) {
+			//if there are more lsba's than removed, no ghost is needed
+			removeOfValue(amount, lsba, false);
+		} else {
+			if (hasOfValue(amount, lsba)) {
+				//if the exact amount of lsba's is removed, a ghost is needed
+				removeOfValue(amount, lsba, true);
+			} else {
+				//otherwise, the action can not be performed
+				return false;
+			}
+		}
+		
+		//add plates to receiving tower
+		to.addPlates(lsba, amount);
+		
+		return true;
+	}
+	
+	/**
+	 * Adds plates to this tower.
+	 * 
+	 * @param value - the value of these plates.
+	 * @param amount - the amount of plates to add.
+	 */
+	public void addPlates(int value, int amount) {
+		if (amount < 1) {
+			return;
+		}
+		
+		//if a ghost of given value exists, remove
+		Iterator<Plate> plateIterator = platesOnThisTower.iterator();
+		
+		while (plateIterator.hasNext()) {
+			Plate current = plateIterator.next();
+			
+			if (current.getValue() == value && current.isGhost()) {
+				platesOnThisTower.remove(current);
+				break;
+			}
+		}
+		
+		//add given amount of plates
+		for (int i = 0; i < amount; i++) {
+			platesOnThisTower.add(new Plate(value));
+		}
+	}
+	
+	/**
+	 * Method needed for plate moving.
+	 */
+	private boolean hasOfValue(int amount, int value) {
+		for (Plate plate : platesOnThisTower) {
+			if (plate.getValue() == value && !plate.isGhost()) {
+				amount--;
+				
+				if (amount == 0) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Method needed for plate moving.
+	 */
+	private void removeOfValue(int amount, int value, boolean retainGhost) {
+		Iterator<Plate> plateIterator = platesOnThisTower.iterator();
+		
+		while (plateIterator.hasNext()) {
+			Plate current = plateIterator.next();
+			
+			if (current.getValue() == value && !current.isGhost()) {
+				if (retainGhost) {
+					platesOnThisTower.add(current.ghostClone());
+					retainGhost = false;
+				}
+				
+				platesOnThisTower.remove(current);
+				amount--;
+				
+				if (amount == 0) {
+					break;
+				}
+			}
+		}
 	}
 	
 	
