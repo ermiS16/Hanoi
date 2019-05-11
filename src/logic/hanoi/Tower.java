@@ -111,7 +111,7 @@ public class Tower {
 		
 		//otherwise, start calculating value and representation
 		int msbValue = platesOnThisTower.get(0).getValue();
-		int[] valueCount = new int[msbValue];
+		int[] valueCount = new int[msbValue + 1];
 		
 		for (Plate p : platesOnThisTower) {
 			valueCount[p.getValue()] += 1;
@@ -119,7 +119,7 @@ public class Tower {
 		
 		StringBuilder representationBuilder = new StringBuilder(msbValue);
 		
-		for (int i = 0; i < msbValue; i++) {
+		for (int i = 0; i < valueCount.length; i++) {
 			//add value of one digit
 			this.value += valueCount[i] * Math.pow(this.numberSystem, i);
 			
