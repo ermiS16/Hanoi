@@ -46,23 +46,4 @@ public class TowerSet {
 	public Tower[] getTowers() {
 		return towers;
 	}
-	
-	
-	/**
-	 * Moves top plates from one tower to another. This will update the towers (including adding ghosts, sorting and
-	 * recalculating value and representation).
-	 * 
-	 * @param from - the tower the plate to move come from. It is assumed the plates intended to move are on the top of
-	 * specified tower.
-	 * @param to - the tower the plates are moved to.
-	 * @param amount - the amount of plates moved.
-	 * 
-	 * @return true if the move was successful, false if there was a problem (not enough plates on the from-tower,
-	 * smaller bottom plate on the to-tower, etc).
-	 */
-	public boolean movePlates(Tower from, Tower to, int amount) {
-		
-		
-		return false;
-	}
 }
