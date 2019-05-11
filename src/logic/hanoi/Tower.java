@@ -20,7 +20,7 @@ public class Tower {
 		if (initWithPlates) {
 			for (int y = 0; y < height; y++) {
 				for (int d = 0; d < dimension; d++) {
-					this.platesOnThisTower.add(new Plate());
+					this.platesOnThisTower.add(new Plate(height - y));
 				}
 			}
 		}
