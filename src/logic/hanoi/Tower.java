@@ -24,6 +24,7 @@ public class Tower {
 		}
 	};
 	
+	private int height;
 	private int numberSystem;
 	private List<Plate> platesOnThisTower;
 	
@@ -40,6 +41,7 @@ public class Tower {
 	 * plates.
 	 */
 	public Tower(int height, int numberSystem, boolean initWithPlates) {
+		this.height = height;
 		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
 		
@@ -90,18 +92,18 @@ public class Tower {
 	/**
 	 * Gets the value of the plate with the lowest value that isn't a ghost.
 	 * 
-	 * @return the value of the least worth plate or, if this tower has no plates, the number system, which is higher
-	 * than any plate value.
+	 * @return the value of the least worth plate or, if this tower has no plates, the height, which is higher than any
+	 * plate value.
 	 */
 	public int getLSBAValue() {
 		if (platesOnThisTower.isEmpty()) {
-			return numberSystem;
+			return height;
 		}
 		
-		int lowest = numberSystem;
+		int lowest = height;
 		
 		for (Plate plate : platesOnThisTower) {
-			if (plate.getValue() < lowest) {
+			if (plate.getValue() < lowest && !plate.isGhost()) {
 				lowest = plate.getValue();
 			}
 		}
@@ -122,6 +124,7 @@ public class Tower {
 	 */
 	public boolean movePlates(Tower to, int amount) {
 		if (to == this) {
+			System.out.println("same");
 			return false;
 		}
 		
@@ -129,22 +132,21 @@ public class Tower {
 		
 		//if the smallest plate on the receiving tower is smaller than this lsba, this can't be done
 		if (lsba > to.getLSBAValue()) {
+			System.out.println("bigger on other");
 			return false;
 		}
 		
 		//check if enough plates can be removed
-		if (hasOfValue(lsba, amount + 1)) {
-			//if there are more lsba's than removed, no ghost is needed
-			removeOfValue(amount, lsba, false);
-		} else {
-			if (hasOfValue(amount, lsba)) {
-				//if the exact amount of lsba's is removed, a ghost is needed
-				removeOfValue(amount, lsba, true);
-			} else {
-				//otherwise, the action can not be performed
-				return false;
-			}
+		int amountOfValue = getAmount(lsba);
+		
+		if (amountOfValue < amount) {
+			return false;
 		}
+		
+		removeOfValue(amount, lsba, amountOfValue == amount);
+		
+		//if there are only ghosts on this tower, remove them
+		clearGhostTower();
 		
 		//add plates to receiving tower
 		to.addPlates(lsba, amount);
@@ -166,15 +168,21 @@ public class Tower {
 			return;
 		}
 		
-		//if a ghost of given value exists, remove
-		Iterator<Plate> plateIterator = platesOnThisTower.iterator();
-		
-		while (plateIterator.hasNext()) {
-			Plate current = plateIterator.next();
+		if (platesOnThisTower.isEmpty()) { //if there are no plates on this tower, ghosts might need to be added
+			for (int i = value - 1; i >= 0; i--) {
+				platesOnThisTower.add(new Plate(i, true));
+			}
+		} else { //if there plates on this tower, there might be a ghost that needs to be removed
+			//if a ghost of given value exists, remove
+			Iterator<Plate> plateIterator = platesOnThisTower.iterator();
 			
-			if (current.getValue() == value && current.isGhost()) {
-				platesOnThisTower.remove(current);
-				break;
+			while (plateIterator.hasNext()) {
+				Plate current = plateIterator.next();
+				
+				if (current.getValue() == value && current.isGhost()) {
+					platesOnThisTower.remove(current);
+					break;
+				}
 			}
 		}
 		
@@ -189,24 +197,24 @@ public class Tower {
 	/**
 	 * Method needed for plate moving.
 	 */
-	private boolean hasOfValue(int amount, int value) {
+	private int getAmount(int value) {
+		int amount = 0;
+		
 		for (Plate plate : platesOnThisTower) {
 			if (plate.getValue() == value && !plate.isGhost()) {
-				amount--;
-				
-				if (amount == 0) {
-					return true;
-				}
+				amount++;
 			}
 		}
 		
-		return false;
+		return amount;
 	}
 	
 	/**
 	 * Method needed for plate moving.
 	 */
 	private void removeOfValue(int amount, int value, boolean retainGhost) {
+		System.out.println("ghost? " + retainGhost);
+		
 		Iterator<Plate> plateIterator = platesOnThisTower.iterator();
 		
 		while (plateIterator.hasNext()) {
@@ -226,6 +234,21 @@ public class Tower {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Method needed for plate moving.
+	 */
+	private void clearGhostTower() {
+		for (Plate p : platesOnThisTower) {
+			if (!p.isGhost()) {
+				//if one plate isn't a ghost, this isn't a ghost tower
+				return;
+			}
+		}
+		
+		//remove all plates (which are all ghosts) from this tower
+		platesOnThisTower = new ArrayList<Plate>();
 	}
 	
 	

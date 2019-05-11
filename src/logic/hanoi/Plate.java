@@ -27,7 +27,7 @@ public class Plate {
 	 * @param value - the value of the new plate.
 	 * @param ghost - if true, this is marked as a ghost plate.
 	 */
-	private Plate(int value, boolean ghost) {
+	public Plate(int value, boolean ghost) {
 		this.value = value;
 		this.ghost = ghost;
 	}
