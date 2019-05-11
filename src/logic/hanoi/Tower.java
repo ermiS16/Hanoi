@@ -256,6 +256,10 @@ public class Tower {
 		int[] valueCount = new int[msbValue + 1];
 		
 		for (Plate p : platesOnThisTower) {
+			if (p.isGhost()) {
+				continue;
+			}
+			
 			valueCount[p.getValue()] += 1;
 		}
 		
