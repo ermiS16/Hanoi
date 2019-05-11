@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import javafx.scene.image.Image;
+
 /**
  * Represents one tower that can hold mulltiple plates.
  * 
@@ -13,6 +15,7 @@ import java.util.List;
  */
 public class Tower {
 	private static final String EMPTY_REPRESENTATIVE = "0";
+
 	
 	//determines the sorting oder on this tower
 	private static final Comparator<Plate> PLATE_SORTING_ORDER = new Comparator<Plate>() {
@@ -78,6 +81,10 @@ public class Tower {
 	 */
 	public int getValue() {
 		return value;
+	}
+	
+	public int getHeight() {
+		return height;
 	}
 	
 	/**
