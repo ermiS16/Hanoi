@@ -23,15 +23,15 @@ public class Tower {
 		}
 	};
 	
-	private int system;
+	private int numberSystem;
 	private List<Plate> platesOnThisTower;
 
 	private int[] valueCount;
 	private int value;
 	private String representation;
 	
-	public Tower(int height, int dimension, boolean initWithPlates) {
-		this.system = dimension + 1;
+	public Tower(int height, int numberSystem, boolean initWithPlates) {
+		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
 		
 		this.valueCount = new int[height];
@@ -41,12 +41,12 @@ public class Tower {
 			//create for each height...
 			for (int y = 0; y < height; y++) {
 				//...dimensions times a plate
-				for (int d = 0; d < dimension; d++) {
+				for (int d = 0; d < numberSystem - 1; d++) {
 					//create a new plate from biggest to smallest
 					this.platesOnThisTower.add(new Plate(y));
 				}
 				
-				this.valueCount[y] = dimension;
+				this.valueCount[y] = numberSystem - 1;
 			}
 		}
 		
@@ -111,7 +111,7 @@ public class Tower {
 		StringBuilder pendingRepresenationBuilder = new StringBuilder(this.valueCount.length);
 		
 		for (int i = 0; i < valueCount.length; i++) {
-			this.value += this.valueCount[i] * Math.pow(this.system, i);
+			this.value += this.valueCount[i] * Math.pow(this.numberSystem, i);
 			pendingRepresenationBuilder.append(this.valueCount[i]);
 			
 			if (this.valueCount[i] != 0) {
