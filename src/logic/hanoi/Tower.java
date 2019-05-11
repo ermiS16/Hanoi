@@ -117,10 +117,14 @@ public class Tower {
 	 * @param amount - the amount of plates to move.
 	 * 
 	 * @return true if the move was successful, false if there was a problem (there are not enough plates of the
-	 * smallest type on this tower or the to-tower has a smaller plate at the top). In such a case, no tower will be
-	 * updated.
+	 * smallest type on this tower, the to-tower has a smaller plate at the top or this receiver is this tower). In
+	 * such a case, no tower will be updated.
 	 */
 	public boolean movePlates(Tower to, int amount) {
+		if (to == this) {
+			return false;
+		}
+		
 		int lsba = getLSBAValue();
 		
 		//if the smallest plate on the receiving tower is smaller than this lsba, this can't be done
@@ -144,6 +148,9 @@ public class Tower {
 		
 		//add plates to receiving tower
 		to.addPlates(lsba, amount);
+		
+		//
+		recalculate();
 		
 		return true;
 	}
@@ -175,6 +182,8 @@ public class Tower {
 		for (int i = 0; i < amount; i++) {
 			platesOnThisTower.add(new Plate(value));
 		}
+		
+		recalculate();
 	}
 	
 	/**
