@@ -1,29 +1,35 @@
 package gui;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import javafx.scene.image.Image;
 
 public class TowerImage {
-	private final Image towerImg;
-	private double height;
+	List<Image> towerImg;
+	private final Image towerParts;
 	private double width;
 	
-	public TowerImage() {
-		towerImg = new Image("assets/tower_part");
-		height = towerImg.getHeight();
-		width = towerImg.getWidth();
+	public TowerImage(int height) {
+		towerParts = new Image("file:/assets/tower_part.png");
+		width = towerParts.getWidth();
+		towerImg = new ArrayList<>();
+
+		for(int i=0; i<height; i++) {
+			towerImg.add(towerParts);
+		}
 	}
 	
-	public Image getTowerImage() {
+	public List<Image> getTowerImage() {
 		return towerImg;
 	}
 	
 	public double getImageHeight() {
-		return height;
+		return towerImg.size();
 	}
 	
 	public double getImageWidth() {
-		return width;
+		return this.width;
 	}
-	
-	
 }

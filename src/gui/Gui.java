@@ -136,14 +136,15 @@ public class Gui extends Application implements Observer{
 	
 	@Override
 	public void start(Stage primaryStage) {
-		HanoiCanvas canvas = new HanoiCanvas(1000,600,app);
-		app = new App();
+		HanoiCanvas canvas = new HanoiCanvas(app, 1500, 600);
+		BorderPane root = new BorderPane();
+				
 		app.addObserver(canvas);
 		canvas.drawApplication(app.getAmountTowers());
-		
-		BorderPane root = new BorderPane();
+
 		root.setCenter(canvas);
 		root.setRight(base);
+
 		
 		quit.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
@@ -167,6 +168,7 @@ public class Gui extends Application implements Observer{
 			}
 		});
 		
+		primaryStage.setTitle("Türme von Hanoi");
 		primaryStage.setScene(new Scene(root,1500,600));
 		primaryStage.show();
 	}
