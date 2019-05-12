@@ -1,6 +1,5 @@
 package gui;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -8,7 +7,6 @@ import java.util.Observer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import logic.hanoi.Tower;
 import main.App;
@@ -34,17 +32,23 @@ public class HanoiCanvas extends Canvas implements Observer {
 
 		//Draw Towers
 		Image img = new Image("file:/assets/test_block.png");
-		for(int index=0; index<amountTowers; index++) {
-			drawTower(gc, app.getTower(index));	
-		}
+		gc.drawImage(img, 100, 100);
+//		for(int index=0; index<amountTowers; index++) {
+//			drawTower(gc, app.getTower(index));	
+//		}
 	}
 	
 	private void drawTower(GraphicsContext gc, Tower tower) {
 		gc.save();
-		int offsetX = 10;
-		int offsetY = 30;
+		@SuppressWarnings("unchecked")
+		List<Image> img = (List<Image>) new TowerImage(tower.getHeight());
+		int offsetX = 30;
+		int offsetY = 10;
 		gc.strokeText("Images", 100, 100);
-		gc.strokeLine(tower.getValue()*offsetX,550, tower.getValue()*10, 450);
+		for(Image twImg : img) {
+			gc.drawImage(twImg, tower.getHeight()*offsetX, tower.getValue()*offsetY);	
+		}
+		
 		gc.restore();
 	}
 
