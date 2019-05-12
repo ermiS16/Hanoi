@@ -33,17 +33,14 @@ public class HanoiCanvas extends Canvas implements Observer {
 		gc.fillRect(0, 0, getWidth(), getHeight());
 
 		//Draw Towers
-		File file = new File("/assets/tower_part.png");
-		String localUrl;
-		try {
-			localUrl = file.toURI().toURL().toString();
-			Image img = new Image(localUrl);
-			if(img.isError()) System.out.println("Image Null");
-			else System.out.println("Image Loaded");
-			gc.drawImage(img, 100, 100);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+
+		Image img = new Image("tower_part.png");
+		System.out.println(img.getProgress());
+		System.out.println(img.isError());
+		System.out.println(img.getException());
+		if(img.isError()) System.out.println("Image Null");
+		else System.out.println("Image Loaded");
+		gc.drawImage(img, 100, 100);
 //		for(int index=0; index<amountTowers; index++) {
 //			drawTower(gc, app.getTower(index));	
 //		}
