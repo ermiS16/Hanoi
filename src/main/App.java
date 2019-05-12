@@ -6,7 +6,6 @@ import java.util.Observable;
 import gui.Gui;
 import javafx.application.*;
 import javafx.scene.image.Image;
-import logic.hanoi.Plate;
 import logic.hanoi.Tower;
 
 public class App extends Observable{

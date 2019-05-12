@@ -1,5 +1,7 @@
 package gui;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -31,8 +33,17 @@ public class HanoiCanvas extends Canvas implements Observer {
 		gc.fillRect(0, 0, getWidth(), getHeight());
 
 		//Draw Towers
-		Image img = new Image("file:/assets/test_block.png");
-		gc.drawImage(img, 100, 100);
+		File file = new File("/assets/tower_part.png");
+		String localUrl;
+		try {
+			localUrl = file.toURI().toURL().toString();
+			Image img = new Image(localUrl);
+			if(img.isError()) System.out.println("Image Null");
+			else System.out.println("Image Loaded");
+			gc.drawImage(img, 100, 100);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 //		for(int index=0; index<amountTowers; index++) {
 //			drawTower(gc, app.getTower(index));	
 //		}
