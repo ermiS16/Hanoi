@@ -1,5 +1,6 @@
 package gui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,25 +8,34 @@ import javafx.scene.image.Image;
 
 public class TowerImage {
 	List<Image> towerImg;
-	private final Image towerParts;
+	List<File> imgFiles;
+	private File file;
+	private Image towerParts;
 	private double width;
 	
 	public TowerImage(int height) {
-		towerParts = new Image("file:/assets/tower_part.png");
-		width = towerParts.getWidth();
+		file = new File("tower_part.png");
+		towerParts = new Image("tower_part.png");
 		towerImg = new ArrayList<>();
-
+		imgFiles = new ArrayList<>();
+		
 		for(int i=0; i<height; i++) {
 			towerImg.add(towerParts);
+			imgFiles.add(file);
+		}
+		if(!imgFiles.isEmpty()) {
+			width = imgFiles.size();
+		}else {
+			width = 0;
 		}
 	}
 	
-	public List<Image> getTowerImage() {
-		return towerImg;
+	public List<File> getTowerImage() {
+		return imgFiles;
 	}
 	
 	public double getImageHeight() {
-		return towerImg.size();
+		return imgFiles.size();
 	}
 	
 	public double getImageWidth() {

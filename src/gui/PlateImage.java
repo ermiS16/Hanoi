@@ -15,9 +15,9 @@ public class PlateImage {
 	
 	
 	public PlateImage(int width) {
-		start = new Image("assets/start_plate.png");
-		mid = new Image("assets/mid_plate.png");
-		end = new Image("assets/end_plate.png");
+		start = new Image("start_plate.png");
+		mid = new Image("mid_plate.png");
+		end = new Image("end_plate.png");
 		this.width = width;
 		this.height = start.getHeight();
 		

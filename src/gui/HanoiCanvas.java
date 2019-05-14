@@ -34,27 +34,31 @@ public class HanoiCanvas extends Canvas implements Observer {
 
 		//Draw Towers
 
-		Image img = new Image("tower_part.png");
-		System.out.println(img.getProgress());
-		System.out.println(img.isError());
-		System.out.println(img.getException());
-		if(img.isError()) System.out.println("Image Null");
-		else System.out.println("Image Loaded");
-		gc.drawImage(img, 100, 100);
-//		for(int index=0; index<amountTowers; index++) {
-//			drawTower(gc, app.getTower(index));	
-//		}
+//		Image img = new Image("tower_part.png");
+//		System.out.println(img.getProgress());
+//		System.out.println(img.isError());
+//		System.out.println(img.getException());
+//		if(img.isError()) System.out.println("Image Null");
+//		else System.out.println("Image Loaded");
+//		gc.drawImage(img, 100, 100);
+		for(int index=0; index<amountTowers; index++) {
+			drawTower(gc, app.getTower(index));	
+		}
 	}
 	
 	private void drawTower(GraphicsContext gc, Tower tower) {
 		gc.save();
-		@SuppressWarnings("unchecked")
-		List<Image> img = (List<Image>) new TowerImage(tower.getHeight());
+		System.out.println(tower.getHeight());
+		TowerImage imgFile = new TowerImage(tower.getHeight());
+		List<File> twFile = imgFile.getTowerImage();
 		int offsetX = 30;
-		int offsetY = 10;
-		gc.strokeText("Images", 100, 100);
-		for(Image twImg : img) {
-			gc.drawImage(twImg, tower.getHeight()*offsetX, tower.getValue()*offsetY);	
+		int offsetY = 45;
+		double newHeight = this.getHeight()-offsetY;
+//		gc.strokeText("Images", 100, 600);
+		for(File file : twFile) {
+			Image twImg = new Image(file.getPath());
+			gc.drawImage(twImg, 100, newHeight);
+			newHeight -= offsetY;
 		}
 		
 		gc.restore();

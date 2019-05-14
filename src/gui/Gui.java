@@ -34,6 +34,8 @@ public class Gui extends Application implements Observer{
 	private Button info;
 	private Button reset;
 	private GridPane base;
+	private GridPane baseFunction;
+	private GridPane baseParameters;
 		
 	// User pick Elemets
 	private TextField varAmountTowers;
@@ -58,16 +60,26 @@ public class Gui extends Application implements Observer{
 		info = new Button("info");
 		reset = new Button("reset");
 		pickNumberSystem = new ComboBox<>(FXCollections.observableArrayList(
-				"1","2","3","4","5","6","7","8","9",
-				"10","11","12","13","14","15","16"));
-		pickNumberSystem.setValue("2");
+				"Dual","3","4","5","6","7","Oktal","9",
+				"Decimal","11","12","13","14","15","Hexadecimal"));
+		pickNumberSystem.setValue(pickNumberSystem.getItems().get(0));
 		base = new GridPane();
-		base.add(info, 0, 0);
-		base.add(quit, 1, 0);
-		base.add(reset, 2, 0);
-		base.add(varAmountTowers, 0, 2);
-		base.add(varNumber, 0, 3);
-		base.add(pickNumberSystem, 0, 4);
+		baseFunction = new GridPane();
+		baseParameters = new GridPane();
+		baseFunction.add(info, 0, 0);
+		baseFunction.add(quit, 1, 0);
+		baseFunction.add(reset, 2, 0);
+		baseParameters.add(varAmountTowers, 0, 2);
+		baseParameters.add(varNumber, 0, 3);
+		baseParameters.add(pickNumberSystem, 0, 4);
+		base.add(baseFunction, 0, 0);
+		base.add(baseParameters, 0, 1);
+//		base.add(info, 0, 0);
+//		base.add(quit, 1, 0);
+//		base.add(reset, 2, 0);
+//		base.add(varAmountTowers, 0, 2);
+//		base.add(varNumber, 0, 3);
+//		base.add(pickNumberSystem, 0, 4);
 		
 		app = createScene();
 		setInitObjects(app);
@@ -100,10 +112,12 @@ public class Gui extends Application implements Observer{
 	
 	@Override
 	public void start(Stage primaryStage) {
-		HanoiCanvas canvas = new HanoiCanvas(app, 1500, 600);
+		HanoiCanvas canvas = new HanoiCanvas(app, 650, 1150);
 		canvas.drawApplication(app.getAmountTowers());
 
 		BorderPane root = new BorderPane();
+		
+//		root.setLeft(canvas);
 		root.setCenter(canvas);
 		root.setRight(base);
 
