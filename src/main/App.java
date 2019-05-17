@@ -1,40 +1,25 @@
 package main;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
 
+import logic.hanoi.*;
 import gui.Gui;
 import javafx.application.*;
 import javafx.scene.image.Image;
-import logic.hanoi.Tower;
 
 public class App extends Observable{
 	
-	private ArrayList<Tower> tower;
+	private TowerSet towerSet;
 
 	public App() {
-		tower = new ArrayList<>();
+		towerSet = new TowerSet();
 	}
-		
-	public void addTower(Tower newTower) {
-		tower.add(newTower);
-	}
-	
-	public int getTowerHeight(int index) {
-		return tower.get(index).getHeight();
+
+	public App(int amountTowers, int towerHeight, int numberSystem) {
+		towerSet = new TowerSet(amountTowers, towerHeight, numberSystem);
 	}
 	
-	public Tower getTower(int index) {
-		Tower t = tower.get(index);
-		return t;
-	}
-	
-	public List<Tower> getTowers(){
-		return this.tower;
-	}
-	
-	public int getAmountTowers() {
-		return tower.size();
+	public TowerSet getTowerSet() {
+		return this.towerSet;
 	}
 	
 	public Image getTowerImage() {

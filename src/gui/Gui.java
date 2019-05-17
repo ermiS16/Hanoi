@@ -12,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import logic.hanoi.Tower;
+import logic.hanoi.TowerSet;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -29,6 +30,8 @@ public class Gui extends Application implements Observer{
 	private final int DEFAULT_BITWIDTH = 3;
 	private final int DEFAULT_NUMBER_SYSTEM = 2;
 	
+	private TowerSet towerSet;
+	
 	// Fix GUI Elemets
 	private Button quit;
 	private Button info;
@@ -40,7 +43,7 @@ public class Gui extends Application implements Observer{
 	// User pick Elemets
 	private TextField varAmountTowers;
 	private TextField varNumber;
-	private int numberSystem;
+	private static int numberSystem;
 	private ComboBox<String> pickNumberSystem;
 
 	// Variable GUI Elements
@@ -51,7 +54,7 @@ public class Gui extends Application implements Observer{
 	
 	@Override
 	public void init() {
-		numberSystem = DEFAULT_NUMBER_SYSTEM;
+		numberSystem = towerSet.getDefaultNumberSystem();
 		varAmountTowers = new TextField();
 		varAmountTowers.setPromptText("Anzahl der Türme");
 		varNumber = new TextField();
@@ -86,26 +89,11 @@ public class Gui extends Application implements Observer{
 	}
 	
 	private void setInitObjects(App application) {
-		towers = new ArrayList<>();
-		for(Tower t : application.getTowers()) {
-			towers.add(t);
-		}
+
 	}
 	
 	public App createScene(){
 		App application = new App();
-		Tower t;
-		for(int i=0; i<DEFAULT_AMOUNT_TOWERS;i++) {
-			if(i==0) {
-				t = new Tower(DEFAULT_BITWIDTH,
-						DEFAULT_NUMBER_SYSTEM, true);
-				application.addTower(t);
-			}else {
-				t = new Tower(DEFAULT_BITWIDTH,
-						DEFAULT_NUMBER_SYSTEM, false);
-				application.addTower(t);
-			}
-		}
 		return application;
 	}
 
@@ -113,14 +101,11 @@ public class Gui extends Application implements Observer{
 	@Override
 	public void start(Stage primaryStage) {
 		HanoiCanvas canvas = new HanoiCanvas(app, 650, 1150);
-		canvas.drawApplication(app.getAmountTowers());
+		canvas.drawApplication(app.getTowerSet());
 
 		BorderPane root = new BorderPane();
-		
-//		root.setLeft(canvas);
 		root.setCenter(canvas);
 		root.setRight(base);
-
 		
 		quit.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
@@ -145,7 +130,7 @@ public class Gui extends Application implements Observer{
 		});
 		
 		primaryStage.setTitle("Türme von Hanoi");
-		primaryStage.setScene(new Scene(root,1500,600));
+		primaryStage.setScene(new Scene(root,1500,800));
 		primaryStage.show();
 	}
 

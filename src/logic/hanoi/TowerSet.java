@@ -10,12 +10,18 @@ public class TowerSet {
 	//saves the towers of this tower set in order
 	private Tower[] towers;
 	
+	
+	//Default Values for Construction of a Tower Set
+	private final static int DEFAULT_TOWER_AMOUNT = 3;
+	private final static int DEFAULT_TOWER_HEIGHT = 3;
+	private final static int DEFAULT_NUMBER_SYSTEM = 2;
+	
 	/**
 	 * Creates a new set of Hanoi towers. The amount of towers default to 3, the tower height to 3 and the
 	 * number system to binary (2).
 	 */
 	public TowerSet() {
-		this(3, 3, 2);
+		this(DEFAULT_TOWER_AMOUNT, DEFAULT_TOWER_HEIGHT, DEFAULT_NUMBER_SYSTEM);
 	}
 	
 	/**
@@ -37,13 +43,29 @@ public class TowerSet {
 		}
 	}
 	
+	public static int getDefaultNumberSystem() {
+		return DEFAULT_NUMBER_SYSTEM;
+	}
+	public static int getDefaultHeight() {
+		return DEFAULT_TOWER_HEIGHT;
+	}
+	public static int getDefaultAmount() {
+		return DEFAULT_TOWER_AMOUNT;
+	}
+	public int getTowerSetLength() {
+		return towers.length;
+	}
 	
 	/**
 	 * Gets the towers of this tower set in order.
 	 * 
 	 * @return  the towers of this tower set in order.
 	 */
-	public Tower[] getTowers() {
+	public Tower[] getTowerSet() {
 		return towers;
+	}
+	
+	public Tower getTower(int index) {
+		return this.towers[index];
 	}
 }

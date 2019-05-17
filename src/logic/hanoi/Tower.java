@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import gui.TowerImage;
 import javafx.scene.image.Image;
 
 /**
@@ -31,6 +32,7 @@ public class Tower {
 	private int numberSystem;
 	private List<Plate> platesOnThisTower;
 	
+	private TowerImage towerImage;
 	private int value;
 	private String representation;
 	
@@ -47,6 +49,7 @@ public class Tower {
 		this.height = height;
 		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
+		this.towerImage = new TowerImage(height);
 		
 		//if initWithPlates is true, create plates for this tower
 		if (initWithPlates) {
@@ -62,6 +65,10 @@ public class Tower {
 		
 		//calculate representation and value of this tower
 		recalculate();
+	}
+	
+	public TowerImage getTowerImage() {
+		return towerImage;
 	}
 	
 	
