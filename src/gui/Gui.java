@@ -18,7 +18,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 
@@ -39,7 +41,10 @@ public class Gui extends Application implements Observer{
 	private GridPane base;
 	private GridPane baseFunction;
 	private GridPane baseParameters;
-		
+	private GridPane baseInfo;
+	private GridPane towerHitBox;
+	private Label showParameter;	
+	
 	// User pick Elemets
 	private TextField varAmountTowers;
 	private TextField varNumber;
@@ -48,13 +53,19 @@ public class Gui extends Application implements Observer{
 
 	// Variable GUI Elements
 	private ArrayList<Tower> towers;
-
+	private String labelBackgroundClicked;
+	private String labelBackgroundUnclicked;
+	private boolean labelClicked;
+	
 	// Necessary Stuff
 	private App app;
 	
 	@Override
 	public void init() {
-		numberSystem = towerSet.getDefaultNumberSystem();
+		labelClicked = false;
+		labelBackgroundClicked = "-fx-background-color: green; -fx-text-fill: white";
+		labelBackgroundUnclicked = "-fx-background.color: grey; -fx-text-fill: black;";
+		numberSystem = TowerSet.getDefaultNumberSystem();
 		varAmountTowers = new TextField();
 		varAmountTowers.setPromptText("Anzahl der Türme");
 		varNumber = new TextField();
@@ -62,6 +73,7 @@ public class Gui extends Application implements Observer{
 		quit = new Button("exit");
 		info = new Button("info");
 		reset = new Button("reset");
+		showParameter = new Label("TestLabel");
 		pickNumberSystem = new ComboBox<>(FXCollections.observableArrayList(
 				"Dual","3","4","5","6","7","Oktal","9",
 				"Decimal","11","12","13","14","15","Hexadecimal"));
@@ -69,14 +81,18 @@ public class Gui extends Application implements Observer{
 		base = new GridPane();
 		baseFunction = new GridPane();
 		baseParameters = new GridPane();
+		baseInfo = new GridPane();
+		towerHitBox = new GridPane();
 		baseFunction.add(info, 0, 0);
 		baseFunction.add(quit, 1, 0);
 		baseFunction.add(reset, 2, 0);
 		baseParameters.add(varAmountTowers, 0, 2);
 		baseParameters.add(varNumber, 0, 3);
 		baseParameters.add(pickNumberSystem, 0, 4);
+		baseInfo.add(showParameter, 0, 4);
 		base.add(baseFunction, 0, 0);
 		base.add(baseParameters, 0, 1);
+		base.add(baseInfo, 0, 2);
 //		base.add(info, 0, 0);
 //		base.add(quit, 1, 0);
 //		base.add(reset, 2, 0);
@@ -89,7 +105,7 @@ public class Gui extends Application implements Observer{
 	}
 	
 	private void setInitObjects(App application) {
-
+		
 	}
 	
 	public App createScene(){
@@ -107,6 +123,18 @@ public class Gui extends Application implements Observer{
 		root.setCenter(canvas);
 		root.setRight(base);
 		
+		showParameter.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override public void handle(MouseEvent e) {
+				if(!labelClicked) {
+					showParameter.setStyle(labelBackgroundClicked);	
+					labelClicked = true;
+				}else {
+					showParameter.setStyle(labelBackgroundUnclicked);
+					labelClicked = false;
+				}
+				
+			}
+		});
 		quit.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
 				Platform.exit();

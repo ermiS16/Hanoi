@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -32,7 +33,8 @@ public class HanoiCanvas extends Canvas implements Observer {
 		GraphicsContext gc = getGraphicsContext2D();
 		gc.setFill(Color.WHITE);
 		gc.fillRect(0, 0, getWidth(), getHeight());
-
+		
+		
 		//Draw Towers
 
 		for(int index=0; index<towerSet.getTowerSetLength(); index++) {
@@ -58,6 +60,12 @@ public class HanoiCanvas extends Canvas implements Observer {
 		
 		gc.restore();
 	}
+	
+	public boolean towerClicked() {
+		
+		return false;
+	}
+	
 	private void drawPlate(GraphicsContext gc, Tower tower) {
 		
 	}
