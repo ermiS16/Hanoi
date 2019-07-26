@@ -4,7 +4,6 @@ import java.util.Observable;
 import logic.hanoi.*;
 import gui.Gui;
 import javafx.application.*;
-import javafx.scene.image.Image;
 
 public class App extends Observable{
 	
@@ -20,10 +19,6 @@ public class App extends Observable{
 	
 	public TowerSet getTowerSet() {
 		return this.towerSet;
-	}
-	
-	public Image getTowerImage() {
-		return getTowerImage();
 	}
 	
 	public static void main(String args[]) {

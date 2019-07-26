@@ -1,104 +1,113 @@
 package gui;
 import main.App;
 
-import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.stage.Screen;
+import javafx.geometry.Rectangle2D;
 import logic.hanoi.Tower;
 import logic.hanoi.TowerSet;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+
 
 
 public class Gui extends Application implements Observer{
 	// Fix Attributes
-	private final int DEFAULT_AMOUNT_TOWERS = 3;
-	private final int DEFAULT_NUMBER = 7; 
-	private final int DEFAULT_BITWIDTH = 3;
-	private final int DEFAULT_NUMBER_SYSTEM = 2;
+
+	private final double REL_WINDOW_SIZE_FACTOR = 0.7;		//70% of screen size
 	
 	private TowerSet towerSet;
 	
 	// Fix GUI Elemets
-	private Button quit;
-	private Button info;
-	private Button reset;
-	private GridPane base;
-	private GridPane baseFunction;
-	private GridPane baseParameters;
-	private GridPane baseInfo;
-	private GridPane towerHitBox;
-	private Label showParameter;	
-	
+
+	private MenuItem quit;
+	private MenuItem info;
+	private MenuItem help;
+	private MenuItem reset;
+	private MenuItem newEntry;
+	private MenuItem save;
+	private MenuItem saveAs;
+	private MenuItem export;
+	private MenuItem exportAs;
+	private MenuItem open;
+	private MenuItem showParameters;
+	private MenuBar menu;
+	private Menu file;
+	private Menu settings;
+	private Menu about;
+	private GridPane baseShowcase;
+		
+
 	// User pick Elemets
 	private TextField varAmountTowers;
 	private TextField varNumber;
-	private static int numberSystem;
 	private ComboBox<String> pickNumberSystem;
 
-	// Variable GUI Elements
-	private ArrayList<Tower> towers;
-	private String labelBackgroundClicked;
-	private String labelBackgroundUnclicked;
-	private boolean labelClicked;
-	
+
+
 	// Necessary Stuff
 	private App app;
 	
 	@Override
 	public void init() {
-		labelClicked = false;
-		labelBackgroundClicked = "-fx-background-color: green; -fx-text-fill: white";
-		labelBackgroundUnclicked = "-fx-background.color: grey; -fx-text-fill: black;";
-		numberSystem = TowerSet.getDefaultNumberSystem();
+
+		//For New Entry
+
 		varAmountTowers = new TextField();
-		varAmountTowers.setPromptText("Anzahl der Türme");
+		varAmountTowers.setPromptText("Anzahl der Tuerme");
 		varNumber = new TextField();
 		varNumber.setPromptText("Zahl");
-		quit = new Button("exit");
-		info = new Button("info");
-		reset = new Button("reset");
-		showParameter = new Label("TestLabel");
+
 		pickNumberSystem = new ComboBox<>(FXCollections.observableArrayList(
 				"Dual","3","4","5","6","7","Oktal","9",
 				"Decimal","11","12","13","14","15","Hexadecimal"));
 		pickNumberSystem.setValue(pickNumberSystem.getItems().get(0));
-		base = new GridPane();
-		baseFunction = new GridPane();
-		baseParameters = new GridPane();
-		baseInfo = new GridPane();
-		towerHitBox = new GridPane();
-		baseFunction.add(info, 0, 0);
-		baseFunction.add(quit, 1, 0);
-		baseFunction.add(reset, 2, 0);
-		baseParameters.add(varAmountTowers, 0, 2);
-		baseParameters.add(varNumber, 0, 3);
-		baseParameters.add(pickNumberSystem, 0, 4);
-		baseInfo.add(showParameter, 0, 4);
-		base.add(baseFunction, 0, 0);
-		base.add(baseParameters, 0, 1);
-		base.add(baseInfo, 0, 2);
-//		base.add(info, 0, 0);
-//		base.add(quit, 1, 0);
-//		base.add(reset, 2, 0);
-//		base.add(varAmountTowers, 0, 2);
-//		base.add(varNumber, 0, 3);
-//		base.add(pickNumberSystem, 0, 4);
+		
+		//Menu Items
+		quit = new MenuItem("exit");
+		info = new MenuItem("info");
+		reset = new MenuItem("reset");
+		newEntry = new MenuItem("new");
+		save = new MenuItem("save");
+		saveAs = new MenuItem("save as...");
+		export = new MenuItem("export");
+		exportAs = new MenuItem("export as...");
+		open = new MenuItem("open");
+		showParameters = new MenuItem("Show Parameters");
+		quit = new MenuItem("quit");
+		reset = new MenuItem("reset");
+		info = new MenuItem("info");
+		help = new MenuItem("help");
+		
+		//Menu
+		menu = new MenuBar();
+		file = new Menu("File");
+		file.getItems().addAll(newEntry, open, save, saveAs, export, exportAs, quit);
+		settings = new Menu("Settings");
+		settings.getItems().addAll(reset, showParameters);
+		about = new Menu("About Us");
+		about.getItems().addAll(info, help);
+		menu.getMenus().addAll(file,settings,about);
+		
+
+		baseShowcase = new GridPane();
+
 		
 		app = createScene();
 		setInitObjects(app);
@@ -113,28 +122,43 @@ public class Gui extends Application implements Observer{
 		return application;
 	}
 
+	private void drawTower(TowerSet towerSet) {
+		int coloumn = 0;
+		int rows = 0;
+		BorderPane bp = new BorderPane();
+		
+		int setLength = towerSet.getTowerSetLength();
+		double coloumnConstraint = (Math.pow(setLength, -1));
+		System.out.println(coloumnConstraint+", "+setLength);
+		baseShowcase.setGridLinesVisible(true);
+		
+		Tower[] tower = towerSet.getTowerSet();
+		
+		ColumnConstraints col = new ColumnConstraints();
+		col.setPercentWidth(coloumnConstraint);
+		System.out.println(col.getPercentWidth());
+		baseShowcase.getColumnConstraints().add(col);
+		
+		for(Tower t : tower) {
+
+			baseShowcase.add(t.getTowerImage(), coloumn, rows);
+			coloumn += 1;
+			rows += 1;
+		}
+	}
 	
 	@Override
 	public void start(Stage primaryStage) {
-		HanoiCanvas canvas = new HanoiCanvas(app, 650, 1150);
-		canvas.drawApplication(app.getTowerSet());
 
+		Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
 		BorderPane root = new BorderPane();
-		root.setCenter(canvas);
-		root.setRight(base);
+
+		root.setCenter(baseShowcase);
+		root.setTop(menu);
 		
-		showParameter.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override public void handle(MouseEvent e) {
-				if(!labelClicked) {
-					showParameter.setStyle(labelBackgroundClicked);	
-					labelClicked = true;
-				}else {
-					showParameter.setStyle(labelBackgroundUnclicked);
-					labelClicked = false;
-				}
-				
-			}
-		});
+		//Draw Towers ToDo
+		drawTower(app.getTowerSet());
+
 		quit.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
 				Platform.exit();
@@ -145,10 +169,10 @@ public class Gui extends Application implements Observer{
 		info.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
 				String contentText = "Autoren: Eric Misfeld, Jonathan Dransfeld\n"
-						+ "Version 1.0, 12.05.2019\n\n"
-						+ "Dieses Programm veranschaunlicht das Zählen\n"
+						+ "Version 0.5, 26.07.2019\n\n"
+						+ "Dieses Programm veranschaunlicht das Zaehlen\n"
 						+ "in verschiedenen Zahlensystemen anhand der\n"
-						+ "Türme von Hanoi.";
+						+ "Tuerme von Hanoi.";
 				Alert information = new Alert(AlertType.INFORMATION);
 				information.setTitle("Information");
 				information.setHeaderText("Informationen zum Programm");
@@ -157,8 +181,10 @@ public class Gui extends Application implements Observer{
 			}
 		});
 		
-		primaryStage.setTitle("Türme von Hanoi");
-		primaryStage.setScene(new Scene(root,1500,800));
+
+		primaryStage.setTitle("Tuerme von Hanoi");
+		primaryStage.setScene(new Scene(root,screenBounds.getWidth()*REL_WINDOW_SIZE_FACTOR,
+										screenBounds.getHeight()*REL_WINDOW_SIZE_FACTOR));
 		primaryStage.show();
 	}
 
