@@ -1,5 +1,7 @@
 package logic.hanoi;
 
+import gui.PlateImage;
+
 /**
  * Represents a single plate that can be on a tower.
  * 
@@ -7,6 +9,7 @@ package logic.hanoi;
  * @version 1.0
  */
 public class Plate {
+	PlateImage plateImg;
 	private int value;
 	private boolean ghost;
 	
@@ -19,6 +22,7 @@ public class Plate {
 	public Plate(int value) {
 		this.value = value;
 		this.ghost = false;
+		this.plateImg = new PlateImage();
 	}
 	
 	/**
@@ -30,8 +34,12 @@ public class Plate {
 	public Plate(int value, boolean ghost) {
 		this.value = value;
 		this.ghost = ghost;
+		this.plateImg = new PlateImage(value, ghost);
 	}
 	
+	public PlateImage getPlateImage() {
+		return plateImg;
+	}
 	
 	/**
 	 * Gets the value of this plate.
