@@ -1,6 +1,7 @@
 package gui;
 import main.App;
 
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import javafx.application.Application;
@@ -18,21 +19,30 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-
+import javafx.scene.canvas.*;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.text.Font;
 
 
 public class Gui extends Application implements Observer{
+		
 	// Fix Attributes
-
 	private final double REL_WINDOW_SIZE_FACTOR = 0.7;		//70% of screen size
 	
-	private TowerSet towerSet;
+	// Setting Attributes
+	private Rectangle2D screenBounds;
+	private double WindowWidth;
+	private double WindowHeight;
 	
 	// Fix GUI Elemets
 
@@ -55,29 +65,34 @@ public class Gui extends Application implements Observer{
 		
 
 	// User pick Elemets
-	private TextField varAmountTowers;
-	private TextField varNumber;
-	private ComboBox<String> pickNumberSystem;
+//	private TextField varAmountTowers;
+//	private TextField varNumber;
+//	private ComboBox<String> pickNumberSystem;
 
 
 
 	// Necessary Stuff
 	private App app;
+//	private TowerSet towerSet;
 	
 	@Override
 	public void init() {
-
-		//For New Entry
-
-		varAmountTowers = new TextField();
-		varAmountTowers.setPromptText("Anzahl der Tuerme");
-		varNumber = new TextField();
-		varNumber.setPromptText("Zahl");
-
-		pickNumberSystem = new ComboBox<>(FXCollections.observableArrayList(
-				"Dual","3","4","5","6","7","Oktal","9",
-				"Decimal","11","12","13","14","15","Hexadecimal"));
-		pickNumberSystem.setValue(pickNumberSystem.getItems().get(0));
+		
+		// Setting Screen Resolution
+		screenBounds = Screen.getPrimary().getVisualBounds();
+		WindowWidth = screenBounds.getWidth()*REL_WINDOW_SIZE_FACTOR;
+		WindowHeight = screenBounds.getHeight()*REL_WINDOW_SIZE_FACTOR;
+		System.out.println(WindowWidth+", "+WindowHeight);
+		
+//		//For New Entry
+//		varAmountTowers = new TextField();
+//		varAmountTowers.setPromptText("Anzahl der Tuerme");
+//		varNumber = new TextField();
+//		varNumber.setPromptText("Zahl");
+//		pickNumberSystem = new ComboBox<>(FXCollections.observableArrayList(
+//				"Dual","3","4","5","6","7","Oktal","9",
+//				"Decimal","11","12","13","14","15","Hexadecimal"));
+//		pickNumberSystem.setValue(pickNumberSystem.getItems().get(0));
 		
 		//Menu Items
 		quit = new MenuItem("exit");
@@ -107,7 +122,7 @@ public class Gui extends Application implements Observer{
 		
 
 		baseShowcase = new GridPane();
-
+		baseShowcase.setPrefWidth(WindowWidth);
 		
 		app = createScene();
 		setInitObjects(app);
@@ -122,42 +137,84 @@ public class Gui extends Application implements Observer{
 		return application;
 	}
 
-	private void drawTower(TowerSet towerSet) {
-		int coloumn = 0;
-		int rows = 0;
-		BorderPane bp = new BorderPane();
+//	private void drawTower(TowerSet towerSet) {
+//		int coloumn = 0;
+//		int rows = 0;
+//		BorderPane bp = new BorderPane();
+//		
+//		int setLength = towerSet.getTowerSetLength();
+//		double coloumnConstraint = (Math.pow(setLength, -1));
+//		System.out.println(coloumnConstraint+", "+setLength);
+//		baseShowcase.setGridLinesVisible(true);
+//		
+//		Tower[] tower = towerSet.getTowerSet();
+//		
+//		ColumnConstraints col = new ColumnConstraints();
+//		col.setMinWidth(coloumnConstraint*baseShowcase.getPrefWidth());
+////		col.setPercentWidth(coloumnConstraint);
+//		System.out.println(col.getPercentWidth());
+//		for(Tower t : tower) {
+//			bp.setCenter(t.getTowerImage());
+//			baseShowcase.getColumnConstraints().add(col);
+//			System.out.println(baseShowcase.getColumnConstraints());
+//			baseShowcase.add(t.getTowerImage(), coloumn, rows);
+//			coloumn += 1;
+////			rows += 1;
+//		}
+//	}
+	
+	public void drawTower(GraphicsContext gc, TowerSet towerSet) {
 		
-		int setLength = towerSet.getTowerSetLength();
-		double coloumnConstraint = (Math.pow(setLength, -1));
-		System.out.println(coloumnConstraint+", "+setLength);
-		baseShowcase.setGridLinesVisible(true);
+		
+		int groundOffsetX = 100;
+		int groundOffsetY = 100;
+		int towerHeightOffset = 45*2;
+		int towerWidthOffset = 40;
+		double canvasHeight = gc.getCanvas().getHeight();
+		double canvasWidth = gc.getCanvas().getWidth();
+		System.out.println(canvasWidth+", "+canvasHeight);
+		double newY = canvasHeight-towerHeightOffset;
+		double newX = groundOffsetX;
+//		gc.strokeText("Images", 100, 600);
 		
 		Tower[] tower = towerSet.getTowerSet();
+		int setLength = towerSet.getTowerSetLength();
 		
-		ColumnConstraints col = new ColumnConstraints();
-		col.setPercentWidth(coloumnConstraint);
-		System.out.println(col.getPercentWidth());
-		baseShowcase.getColumnConstraints().add(col);
-		
+		double towerIntervall = gc.getCanvas().getWidth()*Math.pow(setLength, -1);
+		int i = 0;
 		for(Tower t : tower) {
-
-			baseShowcase.add(t.getTowerImage(), coloumn, rows);
-			coloumn += 1;
-			rows += 1;
+			List<Image> twFile = t.getTowerImage().getImage();
+			for(Image img : twFile) {
+				System.out.println("newX: " + newX + ", newY: " + newY);
+				gc.drawImage(img, newX, newY);
+				newY -= towerHeightOffset;
+				drawPlate(gc, t);
+				gc.fillText("Part "+i, newX+20, newY+towerHeightOffset);
+				i += 1;
+			}
+			i = 0;
+			newY = canvasHeight-towerHeightOffset;
+			newX += groundOffsetX;
 		}
+		
+	}
+	
+	public void drawPlate(GraphicsContext gc, Tower tower) {
+		
 	}
 	
 	@Override
 	public void start(Stage primaryStage) {
 
-		Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
 		BorderPane root = new BorderPane();
-
-		root.setCenter(baseShowcase);
+		Canvas showCase = new Canvas(WindowWidth, WindowHeight);
+		GraphicsContext gc = showCase.getGraphicsContext2D();
+		drawTower(gc, app.getTowerSet());
+		root.setCenter(showCase);
 		root.setTop(menu);
 		
 		//Draw Towers ToDo
-		drawTower(app.getTowerSet());
+//		drawTower(app.getTowerSet());
 
 		quit.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
@@ -183,8 +240,7 @@ public class Gui extends Application implements Observer{
 		
 
 		primaryStage.setTitle("Tuerme von Hanoi");
-		primaryStage.setScene(new Scene(root,screenBounds.getWidth()*REL_WINDOW_SIZE_FACTOR,
-										screenBounds.getHeight()*REL_WINDOW_SIZE_FACTOR));
+		primaryStage.setScene(new Scene(root,WindowWidth, WindowHeight));
 		primaryStage.show();
 	}
 

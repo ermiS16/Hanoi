@@ -7,6 +7,7 @@ import java.util.List;
 
 import gui.TowerImage;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.image.Image;
 
 /**
  * Represents one tower that can hold mulltiple plates.
@@ -67,8 +68,12 @@ public class Tower {
 		recalculate();
 	}
 	
-	public Rectangle getTowerImage() {
-		return towerImage.getTowerImage();
+//	public Rectangle getTowerImage() {
+//		return towerImage.getTowerImage();
+//	}
+	
+	public TowerImage getTowerImage() {
+		return towerImage;
 	}
 	
 	

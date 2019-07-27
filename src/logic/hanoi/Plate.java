@@ -40,6 +40,7 @@ public class Plate {
 	public PlateImage getPlateImage() {
 		return plateImg;
 	}
+
 	
 	/**
 	 * Gets the value of this plate.
