@@ -12,7 +12,7 @@ public class TowerSet {
 	
 	
 	//Default Values for Construction of a Tower Set
-	private final static int DEFAULT_TOWER_AMOUNT = 3;
+	private final static int DEFAULT_TOWER_AMOUNT = 6;
 	private final static int DEFAULT_TOWER_HEIGHT = 3;
 	private final static int DEFAULT_NUMBER_SYSTEM = 2;
 	

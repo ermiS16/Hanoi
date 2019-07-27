@@ -38,6 +38,7 @@ public class Gui extends Application implements Observer{
 		
 	// Fix Attributes
 	private final double REL_WINDOW_SIZE_FACTOR = 0.7;		//70% of screen size
+	private final double TOWER_PART_IMAGE_HEIGHT = 45;
 	
 	// Setting Attributes
 	private Rectangle2D screenBounds;
@@ -165,35 +166,50 @@ public class Gui extends Application implements Observer{
 	
 	public void drawTower(GraphicsContext gc, TowerSet towerSet) {
 		
-		
-		int groundOffsetX = 100;
-		int groundOffsetY = 100;
-		int towerHeightOffset = 45*2;
-		int towerWidthOffset = 40;
-		double canvasHeight = gc.getCanvas().getHeight();
-		double canvasWidth = gc.getCanvas().getWidth();
-		System.out.println(canvasWidth+", "+canvasHeight);
-		double newY = canvasHeight-towerHeightOffset;
-		double newX = groundOffsetX;
-//		gc.strokeText("Images", 100, 600);
-		
 		Tower[] tower = towerSet.getTowerSet();
 		int setLength = towerSet.getTowerSetLength();
 		
-		double towerIntervall = gc.getCanvas().getWidth()*Math.pow(setLength, -1);
-		int i = 0;
+		//
+		double factorForScale = setLength+1;
+		//Distance between Towers
+		double groundOffsetX = gc.getCanvas().getWidth()*Math.pow(factorForScale, -1);
+		//Distance for TowerParts
+		double groundOffsetY = gc.getCanvas().getHeight()/2;								
+		
+		//Resolution of Canvas
+		double canvasHeight = gc.getCanvas().getHeight();
+		double canvasWidth = gc.getCanvas().getWidth();
+		System.out.println(canvasWidth+", "+canvasHeight);
+		
+		//For Placing new Tower
+		double newY = groundOffsetY;
+		double newX = groundOffsetX;		
+		
+		//For tracking the Towers
+		int partIndex = 1;
+		int towerIndex = 1;
+		
 		for(Tower t : tower) {
+			gc.fillText("Tower"+towerIndex, newX, newY+TOWER_PART_IMAGE_HEIGHT+20);
+			
+			//List of Towerparts for ervery Tower
 			List<Image> twFile = t.getTowerImage().getImage();
+			//Drawing the Tower on Canvas
 			for(Image img : twFile) {
 				System.out.println("newX: " + newX + ", newY: " + newY);
 				gc.drawImage(img, newX, newY);
-				newY -= towerHeightOffset;
+				gc.fillText("Part "+partIndex, newX+20, newY+TOWER_PART_IMAGE_HEIGHT);
+				//Placing the new Towerpart above the previous one.
+				newY -= TOWER_PART_IMAGE_HEIGHT;
+				partIndex += 1;
+				
+				//Draw the Plates of the Tower
 				drawPlate(gc, t);
-				gc.fillText("Part "+i, newX+20, newY+towerHeightOffset);
-				i += 1;
+				
 			}
-			i = 0;
-			newY = canvasHeight-towerHeightOffset;
+			partIndex = 1;
+			towerIndex += 1;
+			newY = canvasHeight/2;
 			newX += groundOffsetX;
 		}
 		
