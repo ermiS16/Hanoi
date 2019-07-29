@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import gui.TowerImage;
+import gui.Hitbox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.image.Image;
 
@@ -34,6 +35,8 @@ public class Tower {
 	private List<Plate> platesOnThisTower;
 	
 	private TowerImage towerImage;
+	private Rectangle hitbox;
+	private boolean isHit;
 	private int value;
 	private String representation;
 	
@@ -51,6 +54,8 @@ public class Tower {
 		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
 		this.towerImage = new TowerImage(height);
+		this.hitbox = new Rectangle();
+		this.isHit = false;
 		
 		//if initWithPlates is true, create plates for this tower
 		if (initWithPlates) {
@@ -76,6 +81,13 @@ public class Tower {
 		return towerImage;
 	}
 	
+	public boolean isHit() {
+		return this.isHit;
+	}
+	
+	public void setHit(boolean hit) {
+		this.isHit = hit;
+	}
 	
 	/**
 	 * Gets the plates on this tower. The plates are sorted from broadest to thinnest.
@@ -84,6 +96,15 @@ public class Tower {
 	 */
 	public List<Plate> getPlates() {
 		return platesOnThisTower;
+	}
+	
+	public Rectangle getHitbox() {
+		return this.hitbox;
+	}
+	public void setHitbox(double xStart, double xEnd, double yStart, double yEnd) {
+		double width = xEnd - xStart;
+		double height = yStart - yEnd;
+		this.hitbox = new Rectangle(xStart, yStart, width, height);
 	}
 	
 	/**
