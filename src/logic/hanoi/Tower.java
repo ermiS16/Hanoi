@@ -5,10 +5,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import gui.TowerImage;
 import gui.Hitbox;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.image.Image;
+import gui.Position;
+import javafx.geometry.Point2D;
 
 /**
  * Represents one tower that can hold mulltiple plates.
@@ -30,13 +29,14 @@ public class Tower {
 		}
 	};
 	
-	private int height;
+	private int logicalHeight;
 	private int numberSystem;
 	private List<Plate> platesOnThisTower;
 	
-	private TowerImage towerImage;
-	private Rectangle hitbox;
-	private boolean isHit;
+	private Hitbox hitbox;
+	private Position pos;
+	private double physicalHeight;
+	private double physicalWidth;
 	private int value;
 	private String representation;
 	
@@ -50,12 +50,13 @@ public class Tower {
 	 * plates.
 	 */
 	public Tower(int height, int numberSystem, boolean initWithPlates) {
-		this.height = height;
+		this.logicalHeight = height;
 		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
-		this.towerImage = new TowerImage(height);
-		this.hitbox = new Rectangle();
-		this.isHit = false;
+		this.hitbox = new Hitbox();
+		this.pos = new Position();
+		this.physicalHeight = 0;
+		this.physicalWidth = 0;
 		
 		//if initWithPlates is true, create plates for this tower
 		if (initWithPlates) {
@@ -73,22 +74,20 @@ public class Tower {
 		recalculate();
 	}
 	
-//	public Rectangle getTowerImage() {
-//		return towerImage.getTowerImage();
-//	}
-	
-	public TowerImage getTowerImage() {
-		return towerImage;
+	public Hitbox getHitbox() {
+		return this.hitbox;
 	}
 	
-	public boolean isHit() {
-		return this.isHit;
+	public Position getPosition() {
+		return this.pos;
 	}
 	
-	public void setHit(boolean hit) {
-		this.isHit = hit;
+	public double getPhysicalHeight() {
+		return this.physicalHeight;
 	}
-	
+	public double getPhysicalWidth() {
+		return this.physicalWidth;
+	}
 	/**
 	 * Gets the plates on this tower. The plates are sorted from broadest to thinnest.
 	 * 
@@ -98,15 +97,7 @@ public class Tower {
 		return platesOnThisTower;
 	}
 	
-	public Rectangle getHitbox() {
-		return this.hitbox;
-	}
-	public void setHitbox(double xStart, double xEnd, double yStart, double yEnd) {
-		double width = xEnd - xStart;
-		double height = yStart - yEnd;
-		this.hitbox = new Rectangle(xStart, yStart, width, height);
-	}
-	
+
 	/**
 	 * Gets the caluclated value of this Hanoi tower as an integer in decimal format.
 	 * 
@@ -116,8 +107,8 @@ public class Tower {
 		return value;
 	}
 	
-	public int getHeight() {
-		return height;
+	public int getLogicalHeight() {
+		return logicalHeight;
 	}
 	
 	/**
@@ -137,10 +128,10 @@ public class Tower {
 	 */
 	public int getLSBAValue() {
 		if (platesOnThisTower.isEmpty()) {
-			return height;
+			return logicalHeight;
 		}
 		
-		int lowest = height;
+		int lowest = logicalHeight;
 		
 		for (Plate plate : platesOnThisTower) {
 			if (plate.getValue() < lowest && !plate.isGhost()) {
@@ -195,6 +186,11 @@ public class Tower {
 		recalculate();
 		
 		return true;
+	}
+	
+	public void setPhysicalParameters(double height, double width) {
+		this.physicalHeight = height;
+		this.physicalWidth = width;
 	}
 	
 	/**

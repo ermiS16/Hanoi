@@ -44,19 +44,19 @@ public class HanoiCanvas extends Canvas implements Observer {
 	
 	private void drawTower(GraphicsContext gc, Tower tower) {
 		gc.save();
-		System.out.println(tower.getHeight());
-		List<Image> twFile = tower.getTowerImage().getImage();
+		System.out.println(tower.getLogicalHeight());
+//		List<Image> twFile = tower.getTowerImage().getImage();
 		int groundOffsetX = 30;
 		int groundOffsetY = 100;
 		int towerHeightOffset = 45;
 		int towerWidthOffset = 40;
 		double newHeight = this.getHeight()-groundOffsetY;
 //		gc.strokeText("Images", 100, 600);
-		for(Image img : twFile) {
-			gc.drawImage(img, 100, newHeight);
-			newHeight -= towerHeightOffset;
-			drawPlate(gc, tower);
-		}
+//		for(Image img : twFile) {
+//			gc.drawImage(img, 100, newHeight);
+//			newHeight -= towerHeightOffset;
+//			drawPlate(gc, tower);
+//		}
 		
 		gc.restore();
 	}

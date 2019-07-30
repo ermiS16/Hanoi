@@ -12,8 +12,8 @@ public class TowerSet {
 	
 	
 	//Default Values for Construction of a Tower Set
-	private final static int DEFAULT_TOWER_AMOUNT = 6;
-	private final static int DEFAULT_TOWER_HEIGHT = 3;
+	private final static int DEFAULT_TOWER_AMOUNT = 3;
+	private final static int DEFAULT_TOWER_LOCIGAL_HEIGHT = 3;
 	private final static int DEFAULT_NUMBER_SYSTEM = 2;
 	
 	/**
@@ -21,7 +21,7 @@ public class TowerSet {
 	 * number system to binary (2).
 	 */
 	public TowerSet() {
-		this(DEFAULT_TOWER_AMOUNT, DEFAULT_TOWER_HEIGHT, DEFAULT_NUMBER_SYSTEM);
+		this(DEFAULT_TOWER_AMOUNT, DEFAULT_TOWER_LOCIGAL_HEIGHT, DEFAULT_NUMBER_SYSTEM);
 	}
 	
 	/**
@@ -35,11 +35,11 @@ public class TowerSet {
 	 * Mind that there is a total of (numberSystem - 1) * towerHeight plates (plus potential ghost plates). The first
 	 * tower will have all plates, all other towers none.
 	 */
-	public TowerSet(int towerAmount, int towerHeight, int numberSystem) {
+	public TowerSet(int towerAmount, int towerLogicalHeight, int numberSystem) {
 		this.towers = new Tower[towerAmount];
 		
 		for (int i = 0; i < towers.length; i++) {
-			this.towers[i] = new Tower(towerHeight, numberSystem, i == 0);
+			this.towers[i] = new Tower(towerLogicalHeight, numberSystem, i == 0);
 		}
 	}
 	
@@ -47,7 +47,7 @@ public class TowerSet {
 		return DEFAULT_NUMBER_SYSTEM;
 	}
 	public static int getDefaultHeight() {
-		return DEFAULT_TOWER_HEIGHT;
+		return DEFAULT_TOWER_LOCIGAL_HEIGHT;
 	}
 	public static int getDefaultAmount() {
 		return DEFAULT_TOWER_AMOUNT;
@@ -61,7 +61,7 @@ public class TowerSet {
 	 * 
 	 * @return  the towers of this tower set in order.
 	 */
-	public Tower[] getTowerSet() {
+	public Tower[] getTowers() {
 		return towers;
 	}
 	
