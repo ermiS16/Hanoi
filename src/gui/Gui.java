@@ -218,9 +218,9 @@ public class Gui extends Application implements Observer{
 		
 		//Draw all Towers
 		for(Tower t : this.towerSet) {
-			
-			if(t.getHitbox().isHit()) gc.setFill(Color.YELLOW);
-			else gc.setFill(Color.BLACK);
+			gc.setFill(Color.BLACK);
+//			if(t.getHitbox().isHit()) gc.setFill(Color.YELLOW);
+//			else gc.setFill(Color.BLACK);
 			
 			//Hitbox for ClickEvents
 			t.getHitbox().setHitbox(newX, newX+towerPhysicalWidth, newY, newY-towerPhysicalHeight);
@@ -240,20 +240,48 @@ public class Gui extends Application implements Observer{
 			gc.setLineWidth(0.1);
 			gc.strokeText("Tower "+towerIndex, newX-textCenterOffset, newY+towerPhysicalHeight+textGap);
 			
+
+			drawPlates(gc, t, towerPhysicalHeight, groundOffsetX-towerPhysicalWidth);
+
 			//New Position for the next Tower
 			newX += groundOffsetX;
 			newY = towerPhysicalHeight;
 			
 			towerIndex++;
-			drawPlates(gc, t, towerPhysicalHeight);
 		}
 	}
 	
-	public void drawPlates(GraphicsContext gc, Tower tower, double towerHeight) {
-			double platePhysicalWidth = 0;
-			double platePhysicalHeight = 0;
-			double heightOffetY = 0;
+	public void drawPlates(GraphicsContext gc, Tower tower, double towerHeight, double distanceToNextTower) {
 		
+		List<Plate> plateList = tower.getPlates();
+		
+		//Plates must exist
+		if(!plateList.isEmpty()) {
+
+			double plateGap = 2;
+			double width = 150;
+			double height = 15;
+			double plateWidthFactor = .7;
+			
+			double newX = 0;
+			double newY = tower.getPosition().getY()+tower.getPhysicalHeight();
+//			System.out.println("NewY: " + newY);
+			gc.setLineWidth(height);
+			for(Plate p : plateList) {
+				gc.setFill(Color.BLACK);
+				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
+				
+				
+				newX = tower.getPosition().getX()+(tower.getPhysicalWidth()/2)-(width/2);
+				gc.fillRect(newX, newY, width, height);
+				
+				p.getHitbox().setHitbox(newX, newX+width, newY, newY-height);
+
+				width *= plateWidthFactor;
+
+				newY -= height+plateGap;
+			}
+		}
 	}
 	
 	@Override
@@ -339,12 +367,24 @@ public class Gui extends Application implements Observer{
 					gc.setFill(Color.BLACK);
 					gc.fillOval(e.getX()-5, e.getY()-5, 10, 10);
 					int towerIndex = 1;
+					int plateIndex = 1;
 					System.out.println("CX: " + e.getX()+", CY: " + e.getY());
 					for(Tower t : towerSet) {
-						System.out.println("Tower " + towerIndex + ":");
-						System.out.println("HX: " + t.getHitbox().getX()+", HY: "+ t.getHitbox().getY());
-						System.out.println("HRX: " + t.getHitbox().getLayoutBounds().getMaxX() + ", HRY: "
-											+t.getHitbox().getLayoutBounds().getMaxY());
+						for(Plate p : t.getPlates()) {
+							System.out.println("Plate " + plateIndex + ":");
+							System.out.println("HX: " + p.getHitbox().getX()+", HY: "+ p.getHitbox().getY());
+							System.out.println("HRX: " + p.getHitbox().getLayoutBounds().getMaxX() + ", HRY: "
+												+p.getHitbox().getLayoutBounds().getMaxY());
+							if(p.getHitbox().contains(e.getX(), e.getY())) {
+								if(!p.getHitbox().isHit()) p.getHitbox().setHit(true);
+								else p.getHitbox().setHit(false);
+							}
+							plateIndex++;
+						}
+//						System.out.println("Tower " + towerIndex + ":");
+//						System.out.println("HX: " + t.getHitbox().getX()+", HY: "+ t.getHitbox().getY());
+//						System.out.println("HRX: " + t.getHitbox().getLayoutBounds().getMaxX() + ", HRY: "
+//											+t.getHitbox().getLayoutBounds().getMaxY());
 						if(t.getHitbox().contains(e.getX(), e.getY())) {
 							if(!t.getHitbox().isHit()) t.getHitbox().setHit(true);
 							else t.getHitbox().setHit(false);
