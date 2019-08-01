@@ -1,12 +1,13 @@
 package gui;
-import main.App;
 
-import java.util.ArrayList;
+import main.App;
+import logic.hanoi.Plate;
+import logic.hanoi.Tower;
+import logic.hanoi.TowerSet;
+
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-
-import com.sun.prism.shader.DrawPgram_LinearGradient_PAD_AlphaTest_Loader;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -16,39 +17,23 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
-import javafx.geometry.Orientation;
 import javafx.geometry.Rectangle2D;
-import logic.hanoi.Plate;
-import logic.hanoi.Tower;
-import logic.hanoi.TowerSet;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Separator;
-import javafx.scene.control.Slider;
 import javafx.scene.canvas.*;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ContextMenuEvent;
 
 
@@ -57,7 +42,6 @@ public class Gui extends Application implements Observer{
 	// Fix Attributes
 	private final double REL_WINDOW_SIZE_FACTOR = 0.7;		//70% of screen size
 
-	
 	// Setting Attributes
 	private Rectangle2D screenBounds;
 	private double WindowWidth;
@@ -82,10 +66,8 @@ public class Gui extends Application implements Observer{
 	private Menu file;
 	private Menu settings;
 	private Menu about;
-	private GridPane baseShowcase;
 		
 	//New Entry Windowelements
-	
 	private GridPane newEntryWindow;
 
 	// User pick Elemets
@@ -100,15 +82,16 @@ public class Gui extends Application implements Observer{
 	private App app;
 	private Tower[] towerSet;
 	
+	/**
+	 * Initialization of GUI Elements.
+	 */
 	@Override
 	public void init() {
 		
-		// Setting Screen Resolution
+		// Setting Window Resolution
 		screenBounds = Screen.getPrimary().getVisualBounds();
 		WindowWidth = screenBounds.getWidth()*REL_WINDOW_SIZE_FACTOR;
 		WindowHeight = screenBounds.getHeight()*REL_WINDOW_SIZE_FACTOR;
-//		System.out.println(WindowWidth+", "+WindowHeight);
-		
 		
 //		//For New Entry
 		newEntryWindow = new GridPane();
@@ -164,23 +147,33 @@ public class Gui extends Application implements Observer{
 		about.getItems().addAll(info, help);
 		menu.getMenus().addAll(file,settings,about);
 		
-		baseShowcase = new GridPane();
-		baseShowcase.setPrefWidth(WindowWidth);
-		
 		app = createScene();
 		setInitObjects(app);
 	}
 	
+	/**
+	 * Inits dynamic attributes, that got changed during the Session.
+	 * @param application A new Application with a new TowerSet.
+	 */
 	private void setInitObjects(App application) {		
 		this.towerSet = app.getTowerSet().getTowers();
-//		this.towerSetReset = app.getSave().getTowers();
 	}
 	
+	/**
+	 * Creates an Application with standard values for the Towers.
+	 * @return the current Application
+	 */
 	public App createScene(){
 		App application = new App();
 		return application;
 	}
 	
+	/**
+	 * Draws all Towers from a TowerSet with its containing Plates
+	 * 
+	 * @param gc GraphicContext of the Canvas on which the Towers are drawn.
+	 * @param towerSet Set of Towers, which will be drawn.
+	 */
 	public void drawTower(GraphicsContext gc, TowerSet towerSet) {
 		
 		int setLength = towerSet.getTowerSetLength();
@@ -191,8 +184,6 @@ public class Gui extends Application implements Observer{
 		
 		//Distance between Towers
 		final double groundOffsetX = gc.getCanvas().getWidth()*Math.pow(scalingFactorX, -1);
-		//Height of the Tower
-//		double groundOffsetY = gc.getCanvas().getHeight()/scalingFactorY;
 		
 		//Resolution of the Canvas
 		final double canvasHeight = gc.getCanvas().getHeight();
@@ -202,7 +193,6 @@ public class Gui extends Application implements Observer{
 		final double towerPhysicalWidth = 20;
 			//Also begin on y-axis
 		final double towerPhysicalHeight = gc.getCanvas().getHeight()/scalingFactorY;
-//		System.out.println(canvasWidth+", "+canvasHeight);
 		
 		//Gap between Tower and Text
 		double textGap = 30;
@@ -219,8 +209,6 @@ public class Gui extends Application implements Observer{
 		//Draw all Towers
 		for(Tower t : this.towerSet) {
 			gc.setFill(Color.BLACK);
-//			if(t.getHitbox().isHit()) gc.setFill(Color.YELLOW);
-//			else gc.setFill(Color.BLACK);
 			
 			//Hitbox for ClickEvents
 			t.getHitbox().setHitbox(newX, newX+towerPhysicalWidth, newY, newY-towerPhysicalHeight);
@@ -234,14 +222,12 @@ public class Gui extends Application implements Observer{
 			//Draw new Tower
 			gc.setLineWidth(towerPhysicalWidth);
 			gc.fillRect(newX, newY, towerPhysicalWidth, towerPhysicalHeight);
-//			gc.strokeLine(newX, newY+groundOffsetY, newX, newY);
 			
 			//Name of Tower
 			gc.setLineWidth(0.1);
 			gc.strokeText("Tower "+towerIndex, newX-textCenterOffset, newY+towerPhysicalHeight+textGap);
 			
-
-			drawPlates(gc, t, towerPhysicalHeight, groundOffsetX-towerPhysicalWidth);
+			drawPlates(gc, t);
 
 			//New Position for the next Tower
 			newX += groundOffsetX;
@@ -251,39 +237,56 @@ public class Gui extends Application implements Observer{
 		}
 	}
 	
-	public void drawPlates(GraphicsContext gc, Tower tower, double towerHeight, double distanceToNextTower) {
-		
+	/**
+	 * Draws the Plates from a specific Tower on the Canvas
+	 * 
+	 * @param gc The GraphicContext of the Canvas
+	 * @param tower Tower wich Plates shall be Drawn
+	 */
+	public void drawPlates(GraphicsContext gc, Tower tower) {
 		List<Plate> plateList = tower.getPlates();
 		
 		//Plates must exist
 		if(!plateList.isEmpty()) {
 
+			//Plate Attributes
 			double plateGap = 2;
 			double width = 150;
 			double height = 15;
 			double plateWidthFactor = .7;
 			
+			//Initializing Startposition
 			double newX = 0;
 			double newY = tower.getPosition().getY()+tower.getPhysicalHeight();
-//			System.out.println("NewY: " + newY);
+	
 			gc.setLineWidth(height);
+			
 			for(Plate p : plateList) {
 				gc.setFill(Color.BLACK);
+				
+				//Set Color if Hitbox is hit
 				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
 				
-				
+				//Set the Position on the X-Axis
 				newX = tower.getPosition().getX()+(tower.getPhysicalWidth()/2)-(width/2);
+				
+				//Draw the Plate
 				gc.fillRect(newX, newY, width, height);
 				
+				//Set the Hitbox for the Plate
 				p.getHitbox().setHitbox(newX, newX+width, newY, newY-height);
 
+				//Setting the new Startposition
 				width *= plateWidthFactor;
-
 				newY -= height+plateGap;
 			}
 		}
 	}
 	
+	/**
+	 * Start for the GUI
+	 * Interface for Useractivity
+	 */
 	@Override
 	public void start(Stage primaryStage) {
 		
@@ -362,29 +365,19 @@ public class Gui extends Application implements Observer{
 		
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e) {
-					System.out.println("Left Clicked");
 					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 					gc.setFill(Color.BLACK);
 					gc.fillOval(e.getX()-5, e.getY()-5, 10, 10);
 					int towerIndex = 1;
 					int plateIndex = 1;
-					System.out.println("CX: " + e.getX()+", CY: " + e.getY());
 					for(Tower t : towerSet) {
 						for(Plate p : t.getPlates()) {
-							System.out.println("Plate " + plateIndex + ":");
-							System.out.println("HX: " + p.getHitbox().getX()+", HY: "+ p.getHitbox().getY());
-							System.out.println("HRX: " + p.getHitbox().getLayoutBounds().getMaxX() + ", HRY: "
-												+p.getHitbox().getLayoutBounds().getMaxY());
 							if(p.getHitbox().contains(e.getX(), e.getY())) {
 								if(!p.getHitbox().isHit()) p.getHitbox().setHit(true);
 								else p.getHitbox().setHit(false);
 							}
 							plateIndex++;
 						}
-//						System.out.println("Tower " + towerIndex + ":");
-//						System.out.println("HX: " + t.getHitbox().getX()+", HY: "+ t.getHitbox().getY());
-//						System.out.println("HRX: " + t.getHitbox().getLayoutBounds().getMaxX() + ", HRY: "
-//											+t.getHitbox().getLayoutBounds().getMaxY());
 						if(t.getHitbox().contains(e.getX(), e.getY())) {
 							if(!t.getHitbox().isHit()) t.getHitbox().setHit(true);
 							else t.getHitbox().setHit(false);

@@ -74,20 +74,38 @@ public class Tower {
 		recalculate();
 	}
 	
+	/**
+	 * Gets the Hitbox of this Tower
+	 * @return the Hitbox
+	 */
 	public Hitbox getHitbox() {
 		return this.hitbox;
 	}
 	
+	/**
+	 * Gets the current Position of the Tower on the Canvas
+	 * @return the current Position.
+	 */
 	public Position getPosition() {
 		return this.pos;
 	}
 	
+	/**
+	 * Gets the physical height (in px) as it's shown on the canvas.
+	 * @return the physical height of this tower.
+	 */
 	public double getPhysicalHeight() {
 		return this.physicalHeight;
 	}
+	
+	/**
+	 * Gets the physical width (in px) as it's shown on the canvas.
+	 * @return the physical width of this tower.
+	 */
 	public double getPhysicalWidth() {
 		return this.physicalWidth;
 	}
+	
 	/**
 	 * Gets the plates on this tower. The plates are sorted from broadest to thinnest.
 	 * 
@@ -97,7 +115,6 @@ public class Tower {
 		return platesOnThisTower;
 	}
 	
-
 	/**
 	 * Gets the caluclated value of this Hanoi tower as an integer in decimal format.
 	 * 
@@ -107,6 +124,10 @@ public class Tower {
 		return value;
 	}
 	
+	/**
+	 * Gets the logical height of the Tower, as it needed for the number of total plates that the tower can carry.
+	 * @return the logical height of the Tower.
+	 */
 	public int getLogicalHeight() {
 		return logicalHeight;
 	}
@@ -188,6 +209,11 @@ public class Tower {
 		return true;
 	}
 	
+	/**
+	 * Sets the physical Parameters for the Tower, as it's drawn on the Canvas
+	 * @param height of the Tower (in px).
+	 * @param width of the Tower (in px).
+	 */
 	public void setPhysicalParameters(double height, double width) {
 		this.physicalHeight = height;
 		this.physicalWidth = width;

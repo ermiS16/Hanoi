@@ -1,6 +1,5 @@
 package logic.hanoi;
 
-import gui.PlateImage;
 import gui.Hitbox;
 
 /**
@@ -10,11 +9,9 @@ import gui.Hitbox;
  * @version 1.0
  */
 public class Plate {
-	PlateImage plateImg;
 	private int value;
 	private boolean ghost;
 	private Hitbox hitbox;
-	private boolean isHit;
 	
 	/**
 	 * Creates a new plate.
@@ -24,9 +21,7 @@ public class Plate {
 	public Plate(int value) {
 		this.value = value;
 		this.ghost = false;
-		this.plateImg = new PlateImage();
 		this.hitbox = new Hitbox();
-		this.isHit = false;
 	}
 	
 	/**
@@ -38,25 +33,16 @@ public class Plate {
 	public Plate(int value, boolean ghost) {
 		this.value = value;
 		this.ghost = ghost;
-		this.plateImg = new PlateImage(value, ghost);
 		this.hitbox = new Hitbox();
-		this.isHit = false;
 	}
 	
-	public void setHit(boolean hit) {
-		this.isHit = hit;
-	}
-	public boolean isHit() {
-		return this.isHit;
-	}
+	/**
+	 * Gets the Hitbox of this Tower
+	 * @return the Hitbox
+	 */
 	public Hitbox getHitbox() {
 		return this.hitbox;
 	}
-	
-	public PlateImage getPlateImage() {
-		return plateImg;
-	}
-
 	
 	/**
 	 * Gets the value of this plate.
