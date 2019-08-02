@@ -276,6 +276,7 @@ public class Tower {
 	 */
 	private void removeOfValue(int amount, int value, boolean retainGhost) {
 		System.out.println("ghost? " + retainGhost);
+		List<Plate> platesToRemove = new ArrayList<Plate>();
 		
 		Iterator<Plate> plateIterator = platesOnThisTower.iterator();
 		
@@ -287,14 +288,15 @@ public class Tower {
 					platesOnThisTower.add(current.ghostClone());
 					retainGhost = false;
 				}
-				
-				platesOnThisTower.remove(current);
+				platesToRemove.add(current);
 				amount--;
-				
 				if (amount == 0) {
 					break;
 				}
 			}
+		}
+		for(Plate p : platesToRemove) {
+			platesOnThisTower.remove(p);
 		}
 	}
 	

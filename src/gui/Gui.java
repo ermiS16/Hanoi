@@ -220,6 +220,7 @@ public class Gui extends Application implements Observer{
 			t.setPhysicalParameters(towerPhysicalHeight, towerPhysicalWidth);
 			
 			//Draw new Tower
+			if(t.getHitbox().isHit()) gc.setFill(Color.YELLOW);
 			gc.setLineWidth(towerPhysicalWidth);
 			gc.fillRect(newX, newY, towerPhysicalWidth, towerPhysicalHeight);
 			
@@ -365,24 +366,36 @@ public class Gui extends Application implements Observer{
 		
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e) {
+					boolean plateHit = false;
+					boolean towerHit = false;
+					int amountPlateHits = 0;
+					Tower from = null;
 					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 					gc.setFill(Color.BLACK);
 					gc.fillOval(e.getX()-5, e.getY()-5, 10, 10);
 					int towerIndex = 1;
 					int plateIndex = 1;
 					for(Tower t : towerSet) {
-						for(Plate p : t.getPlates()) {
-							if(p.getHitbox().contains(e.getX(), e.getY())) {
-								if(!p.getHitbox().isHit()) p.getHitbox().setHit(true);
-								else p.getHitbox().setHit(false);
+						if(!t.getPlates().isEmpty()) {
+							for(Plate p : t.getPlates()) {
+								if(p.getHitbox().contains(e.getX(), e.getY())) {
+									if(!p.getHitbox().isHit()) {
+										p.getHitbox().setHit(true);
+										amountPlateHits++;
+									}
+									else p.getHitbox().setHit(false);
+								}
+								plateIndex++;
 							}
-							plateIndex++;
 						}
 						if(t.getHitbox().contains(e.getX(), e.getY())) {
-							if(!t.getHitbox().isHit()) t.getHitbox().setHit(true);
-							else t.getHitbox().setHit(false);
+							if(!t.getHitbox().isHit()) {
+//								t.getHitbox().setHit(true);
+								from.movePlates(t, amountPlateHits);
+							}
+//							else t.getHitbox().setHit(false);
 						}
-						towerIndex++;
+						from = t;
 					}
 			}
 		});
