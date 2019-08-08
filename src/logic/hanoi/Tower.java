@@ -259,7 +259,7 @@ public class Tower {
 	/**
 	 * Method needed for plate moving.
 	 */
-	private int getAmount(int value) {
+	public int getAmount(int value) {
 		int amount = 0;
 		
 		for (Plate plate : platesOnThisTower) {
@@ -274,7 +274,7 @@ public class Tower {
 	/**
 	 * Method needed for plate moving.
 	 */
-	private void removeOfValue(int amount, int value, boolean retainGhost) {
+	public void removeOfValue(int amount, int value, boolean retainGhost) {
 		System.out.println("ghost? " + retainGhost);
 		List<Plate> platesToRemove = new ArrayList<Plate>();
 		
@@ -303,7 +303,7 @@ public class Tower {
 	/**
 	 * Method needed for plate moving.
 	 */
-	private void clearGhostTower() {
+	public void clearGhostTower() {
 		for (Plate p : platesOnThisTower) {
 			if (!p.isGhost()) {
 				//if one plate isn't a ghost, this isn't a ghost tower
@@ -319,7 +319,7 @@ public class Tower {
 	/**
 	 * Sorts the plates on the tower. Should be called after every time plates are added or removed.
 	 */
-	private void sortPlates() {
+	public void sortPlates() {
 		platesOnThisTower.sort(PLATE_SORTING_ORDER);
 	}
 	
@@ -327,7 +327,7 @@ public class Tower {
 	 * Recalculates value and representation of this tower. Should be called after every time plates are added or
 	 * removed. This method calls sortPlates().
 	 */
-	private void recalculate() {
+	public void recalculate() {
 		sortPlates();
 		
 		this.value = 0;

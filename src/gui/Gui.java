@@ -5,6 +5,7 @@ import logic.hanoi.Plate;
 import logic.hanoi.Tower;
 import logic.hanoi.TowerSet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -81,6 +82,8 @@ public class Gui extends Application implements Observer{
 	// Necessary Stuff
 	private App app;
 	private Tower[] towerSet;
+	private int amountPlatesHit;
+	private Tower platesFrom;
 	
 	/**
 	 * Initialization of GUI Elements.
@@ -147,6 +150,8 @@ public class Gui extends Application implements Observer{
 		about.getItems().addAll(info, help);
 		menu.getMenus().addAll(file,settings,about);
 		
+		amountPlatesHit = 0;
+		platesFrom = null;
 		app = createScene();
 		setInitObjects(app);
 	}
@@ -155,7 +160,7 @@ public class Gui extends Application implements Observer{
 	 * Inits dynamic attributes, that got changed during the Session.
 	 * @param application A new Application with a new TowerSet.
 	 */
-	private void setInitObjects(App application) {		
+	private void setInitObjects(App application) {	
 		this.towerSet = app.getTowerSet().getTowers();
 	}
 	
@@ -238,6 +243,10 @@ public class Gui extends Application implements Observer{
 		}
 	}
 	
+	public void setHits(){
+		
+	}
+	
 	/**
 	 * Draws the Plates from a specific Tower on the Canvas
 	 * 
@@ -263,16 +272,20 @@ public class Gui extends Application implements Observer{
 			gc.setLineWidth(height);
 			
 			for(Plate p : plateList) {
-				gc.setFill(Color.BLACK);
+				if(p.isGhost()) gc.setFill(Color.GRAY);
+				else gc.setFill(Color.BLACK);
 				
 				//Set Color if Hitbox is hit
 				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
+				
+				//Save Physical Height and Width for Tower
+				p.setPhysicalParameters(width, height);
 				
 				//Set the Position on the X-Axis
 				newX = tower.getPosition().getX()+(tower.getPhysicalWidth()/2)-(width/2);
 				
 				//Draw the Plate
-				gc.fillRect(newX, newY, width, height);
+				gc.fillRect(newX, newY, p.getPhysicalWidth(), p.getPhysicalHeight());
 				
 				//Set the Hitbox for the Plate
 				p.getHitbox().setHitbox(newX, newX+width, newY, newY-height);
@@ -282,6 +295,62 @@ public class Gui extends Application implements Observer{
 				newY -= height+plateGap;
 			}
 		}
+	}
+	
+	public int getAmountPlatesHit() {
+		return this.amountPlatesHit;
+	}
+	
+	public void countAmountPlatesHit() {
+		this.amountPlatesHit++;
+	}
+	
+	public void resetAmountPlatesHit() {
+		this.amountPlatesHit = 0;
+	}
+	
+	public void platesFrom(Tower t) {
+		this.platesFrom = t;
+	}
+	
+	public Tower getPlatesFrom() {
+		return this.platesFrom;
+	}
+	
+	public boolean movePlates(Tower from, Tower to, int amount) {
+		if (to == from) {
+			System.out.println("same");
+			return false;
+		}
+		
+		int lsba = from.getLSBAValue();
+		
+		//if the smallest plate on the receiving tower is smaller than this lsba, this can't be done
+		if (lsba > to.getLSBAValue()) {
+			System.out.println("bigger on other");
+			return false;
+		}
+		
+		//check if enough plates can be removed
+		int amountOfValue = from.getAmount(lsba);
+		
+		if (amountOfValue < amount) {
+			return false;
+		}
+		
+		from.removeOfValue(amount, lsba, amountOfValue == amount);
+		
+		//if there are only ghosts on this tower, remove them
+		from.clearGhostTower();
+		
+		//add plates to receiving tower
+		to.addPlates(lsba, amount);
+		
+		//
+		from.recalculate();
+		to.recalculate();
+		
+		return true;
 	}
 	
 	/**
@@ -363,12 +432,10 @@ public class Gui extends Application implements Observer{
 				});
 			}
 		});
-		
+
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e) {
-					boolean plateHit = false;
 					boolean towerHit = false;
-					int amountPlateHits = 0;
 					Tower from = null;
 					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 					gc.setFill(Color.BLACK);
@@ -380,22 +447,27 @@ public class Gui extends Application implements Observer{
 							for(Plate p : t.getPlates()) {
 								if(p.getHitbox().contains(e.getX(), e.getY())) {
 									if(!p.getHitbox().isHit()) {
+										platesFrom(t);
 										p.getHitbox().setHit(true);
-										amountPlateHits++;
+										countAmountPlatesHit();
 									}
-									else p.getHitbox().setHit(false);
+									else {
+										p.getHitbox().setHit(false);
+									}
 								}
 								plateIndex++;
 							}
 						}
 						if(t.getHitbox().contains(e.getX(), e.getY())) {
 							if(!t.getHitbox().isHit()) {
-//								t.getHitbox().setHit(true);
-								from.movePlates(t, amountPlateHits);
+								t.getHitbox().setHit(true);
+								from = getPlatesFrom();
+								movePlates(from, t, getAmountPlatesHit());
+//								from.movePlates(t, getAmountPlatesHit());
+								resetAmountPlatesHit();
 							}
-//							else t.getHitbox().setHit(false);
+							else t.getHitbox().setHit(false);
 						}
-						from = t;
 					}
 			}
 		});

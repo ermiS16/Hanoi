@@ -9,9 +9,14 @@ import gui.Hitbox;
  * @version 1.0
  */
 public class Plate {
+	
+	private final double WIDTH_FACTOR = .7;
+	
 	private int value;
 	private boolean ghost;
 	private Hitbox hitbox;
+	private double physicalWidth;
+	private double physicalHeight;
 	
 	/**
 	 * Creates a new plate.
@@ -22,6 +27,8 @@ public class Plate {
 		this.value = value;
 		this.ghost = false;
 		this.hitbox = new Hitbox();
+		this.physicalWidth = 0;
+		this.physicalHeight = 0;
 	}
 	
 	/**
@@ -34,8 +41,21 @@ public class Plate {
 		this.value = value;
 		this.ghost = ghost;
 		this.hitbox = new Hitbox();
+		this.physicalWidth = 0;
+		this.physicalHeight = 0;
 	}
 	
+	public void setPhysicalParameters(double width, double height) {
+		this.physicalWidth = width;
+		this.physicalHeight = height;
+	}
+	
+	public double getPhysicalWidth() {
+		return this.physicalWidth;
+	}
+	public double getPhysicalHeight() {
+		return this.physicalHeight;
+	}
 	/**
 	 * Gets the Hitbox of this Tower
 	 * @return the Hitbox
