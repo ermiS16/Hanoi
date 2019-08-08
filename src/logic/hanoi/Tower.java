@@ -174,6 +174,7 @@ public class Tower {
 	 * smallest type on this tower, the to-tower has a smaller plate at the top or this receiver is this tower). In
 	 * such a case, no tower will be updated.
 	 */
+	/*
 	public boolean movePlates(Tower to, int amount) {
 		if (to == this) {
 			System.out.println("same");
@@ -208,7 +209,7 @@ public class Tower {
 		
 		return true;
 	}
-	
+	*/
 	/**
 	 * Sets the physical Parameters for the Tower, as it's drawn on the Canvas
 	 * @param height of the Tower (in px).
@@ -225,13 +226,14 @@ public class Tower {
 	 * @param value - the value of these plates.
 	 * @param amount - the amount of plates to add.
 	 */
-	public void addPlates(int value, int amount) {
+	public void addPlates(int value, int amount, List<Plate> platesToMove) {
 		if (amount < 1) {
 			return;
 		}
-		
 		if (platesOnThisTower.isEmpty()) { //if there are no plates on this tower, ghosts might need to be added
 			for (int i = value - 1; i >= 0; i--) {
+//				double width = platesToMove.get(i).getPhysicalWidth();
+//				double height = platesToMove.get(i).getPhysicalHeight();
 				platesOnThisTower.add(new Plate(i, true));
 			}
 		} else { //if there plates on this tower, there might be a ghost that needs to be removed
@@ -247,11 +249,13 @@ public class Tower {
 				}
 			}
 		}
-		
-		//add given amount of plates
-		for (int i = 0; i < amount; i++) {
-			platesOnThisTower.add(new Plate(value));
+		for(Plate p : platesToMove) {
+			platesOnThisTower.add(p);
 		}
+		//add given amount of plates
+//		for (int i = 0; i < amount; i++) {
+//			platesOnThisTower.add(new Plate(value));
+//		}
 		
 		recalculate();
 	}

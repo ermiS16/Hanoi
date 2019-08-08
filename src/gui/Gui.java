@@ -38,7 +38,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ContextMenuEvent;
 
 
-public class Gui extends Application implements Observer{
+public class Gui extends Application{
 		
 	// Fix Attributes
 	private final double REL_WINDOW_SIZE_FACTOR = 0.7;		//70% of screen size
@@ -84,6 +84,10 @@ public class Gui extends Application implements Observer{
 	private Tower[] towerSet;
 	private int amountPlatesHit;
 	private Tower platesFrom;
+//	private double towerPhysicalHeight;
+//	private double towerPhysicalWidth;
+	private final double SCALING_FACTOR_Y = 3;
+	private final double SCALING_FACTOR_PLATE = .7;
 	
 	/**
 	 * Initialization of GUI Elements.
@@ -162,6 +166,22 @@ public class Gui extends Application implements Observer{
 	 */
 	private void setInitObjects(App application) {	
 		this.towerSet = app.getTowerSet().getTowers();
+				
+		//Physical Shape parameter of the Tower
+		final double towerWidth = 20;
+			//Also begin on y-axis
+		final double towerHeight = WindowHeight/SCALING_FACTOR_Y;
+
+		double plateWidth = 150;
+		double plateHeight = 15;
+		
+		for(Tower t : this.towerSet) {
+			t.setPhysicalParameters(towerHeight, towerWidth);
+			for(Plate p : t.getPlates()) {
+				p.setPhysicalParameters(plateWidth, plateHeight);
+				plateWidth *= SCALING_FACTOR_PLATE;
+			}
+		}
 	}
 	
 	/**
@@ -188,25 +208,17 @@ public class Gui extends Application implements Observer{
 		final double scalingFactorY = 3;
 		
 		//Distance between Towers
-		final double groundOffsetX = gc.getCanvas().getWidth()*Math.pow(scalingFactorX, -1);
-		
-		//Resolution of the Canvas
-		final double canvasHeight = gc.getCanvas().getHeight();
-		final double canvasWidth = gc.getCanvas().getWidth();
-		
-		//Physical Shape parameter of the Tower
-		final double towerPhysicalWidth = 20;
-			//Also begin on y-axis
-		final double towerPhysicalHeight = gc.getCanvas().getHeight()/scalingFactorY;
-		
+		final double groundOffsetX = gc.getCanvas().getWidth()
+				*Math.pow(scalingFactorX, -1);
+				
 		//Gap between Tower and Text
 		double textGap = 30;
 		
 		//To Center the Text
-		double textCenterOffset = towerPhysicalWidth/2;
+		double textCenterOffset = towerSet.getTowers()[0].getPhysicalWidth()/2;
 		
 		// Start for the drawing of the Towers
-		double newY = towerPhysicalHeight;
+		double newY = towerSet.getTowers()[0].getPhysicalHeight();
 		double newX = groundOffsetX;
 		
 		int towerIndex = 1;
@@ -216,28 +228,32 @@ public class Gui extends Application implements Observer{
 			gc.setFill(Color.BLACK);
 			
 			//Hitbox for ClickEvents
-			t.getHitbox().setHitbox(newX, newX+towerPhysicalWidth, newY, newY-towerPhysicalHeight);
+			t.getHitbox().setHitbox(newX, newX+t.getPhysicalWidth(),
+					newY, newY-t.getPhysicalHeight());
 			
 			//Save Position for Tower
 			t.getPosition().setPosition(newX, newY);
 			
-			//Save Physical Height and Width for Tower
-			t.setPhysicalParameters(towerPhysicalHeight, towerPhysicalWidth);
+//			//Save Physical Height and Width for Tower
+//			t.setPhysicalParameters(towerPhysicalHeight, towerPhysicalWidth);
 			
 			//Draw new Tower
 			if(t.getHitbox().isHit()) gc.setFill(Color.YELLOW);
-			gc.setLineWidth(towerPhysicalWidth);
-			gc.fillRect(newX, newY, towerPhysicalWidth, towerPhysicalHeight);
+			gc.setLineWidth(t.getPhysicalWidth());
+			gc.fillRect(newX, newY, t.getPhysicalWidth(), t.getPhysicalHeight());
 			
 			//Name of Tower
 			gc.setLineWidth(0.1);
-			gc.strokeText("Tower "+towerIndex, newX-textCenterOffset, newY+towerPhysicalHeight+textGap);
+			gc.strokeText("Tower "+towerIndex, newX-textCenterOffset,
+					newY+t.getPhysicalHeight()+textGap);
+			gc.strokeText(t.getRepresentation(), newX-textCenterOffset,
+				newY+t.getPhysicalHeight()+(textGap*2));
 			
 			drawPlates(gc, t);
 
 			//New Position for the next Tower
 			newX += groundOffsetX;
-			newY = towerPhysicalHeight;
+			newY = t.getPhysicalHeight();
 			
 			towerIndex++;
 		}
@@ -261,38 +277,41 @@ public class Gui extends Application implements Observer{
 
 			//Plate Attributes
 			double plateGap = 2;
-			double width = 150;
-			double height = 15;
-			double plateWidthFactor = .7;
+//			double width = 150;
+//			double height = 15;
+//			double plateWidthFactor = .7;
 			
 			//Initializing Startposition
 			double newX = 0;
 			double newY = tower.getPosition().getY()+tower.getPhysicalHeight();
 	
-			gc.setLineWidth(height);
+//			gc.setLineWidth(height);
 			
 			for(Plate p : plateList) {
 				if(p.isGhost()) gc.setFill(Color.GRAY);
 				else gc.setFill(Color.BLACK);
 				
 				//Set Color if Hitbox is hit
-				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
+//				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
 				
-				//Save Physical Height and Width for Tower
-				p.setPhysicalParameters(width, height);
-				
+//				//Save Physical Height and Width for Tower
+//				p.setPhysicalParameters(width, height);
+//				
 				//Set the Position on the X-Axis
-				newX = tower.getPosition().getX()+(tower.getPhysicalWidth()/2)-(width/2);
+				newX = tower.getPosition().getX()
+						+(tower.getPhysicalWidth()/2)-(p.getPhysicalWidth()/2);
 				
 				//Draw the Plate
+				gc.setLineWidth(p.getPhysicalHeight());
 				gc.fillRect(newX, newY, p.getPhysicalWidth(), p.getPhysicalHeight());
 				
 				//Set the Hitbox for the Plate
-				p.getHitbox().setHitbox(newX, newX+width, newY, newY-height);
+				p.getHitbox().setHitbox(newX, newX+p.getPhysicalWidth(), newY,
+						newY-p.getPhysicalHeight());
 
 				//Setting the new Startposition
-				width *= plateWidthFactor;
-				newY -= height+plateGap;
+//				width *= plateWidthFactor;
+				newY -= p.getPhysicalHeight()+plateGap;
 			}
 		}
 	}
@@ -338,13 +357,18 @@ public class Gui extends Application implements Observer{
 			return false;
 		}
 		
+		List<Plate> platesToMove = new ArrayList<>();
+		for(int i=from.getPlates().size()-1; amount>0; amount--, i--) {
+			platesToMove.add(from.getPlates().get(i));
+		}
+		
 		from.removeOfValue(amount, lsba, amountOfValue == amount);
 		
 		//if there are only ghosts on this tower, remove them
 		from.clearGhostTower();
 		
 		//add plates to receiving tower
-		to.addPlates(lsba, amount);
+		to.addPlates(lsba, amount, platesToMove);
 		
 		//
 		from.recalculate();
@@ -352,7 +376,7 @@ public class Gui extends Application implements Observer{
 		
 		return true;
 	}
-	
+			
 	/**
 	 * Start for the GUI
 	 * Interface for Useractivity
@@ -367,7 +391,7 @@ public class Gui extends Application implements Observer{
 
 		root.add(menu, 0, 0);
 		root.add(showCase, 0, 1);
-
+		
 		//Show mouse context menu on right click.
 		showCase.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
 			public void handle(ContextMenuEvent e) {
@@ -465,6 +489,8 @@ public class Gui extends Application implements Observer{
 								movePlates(from, t, getAmountPlatesHit());
 //								from.movePlates(t, getAmountPlatesHit());
 								resetAmountPlatesHit();
+								t.getHitbox().setHit(false);
+								from.getHitbox().setHit(false);
 							}
 							else t.getHitbox().setHit(false);
 						}
@@ -511,11 +537,4 @@ public class Gui extends Application implements Observer{
 		primaryStage.setScene(new Scene(root,WindowWidth, WindowHeight));
 		primaryStage.show();
 	}
-
-	@Override
-	public void update(Observable arg0, Object arg1) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

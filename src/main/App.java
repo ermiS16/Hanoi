@@ -1,11 +1,10 @@
 package main;
-import java.util.Observable;
 
 import logic.hanoi.*;
 import gui.Gui;
 import javafx.application.*;
 
-public class App extends Observable{
+public class App{
 	
 	private TowerSet towerSet;
 	private int amountTowers;
