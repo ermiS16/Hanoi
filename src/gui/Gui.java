@@ -357,8 +357,9 @@ public class Gui extends Application{
 			return false;
 		}
 		
+		int fromIndex = from.getPlates().size()-1-lsba;
 		List<Plate> platesToMove = new ArrayList<>();
-		for(int i=from.getPlates().size()-1; amount>0; amount--, i--) {
+		for(int i = fromIndex, count=0; count<amount ;count++, i--) {
 			platesToMove.add(from.getPlates().get(i));
 		}
 		
