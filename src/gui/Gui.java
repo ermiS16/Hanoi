@@ -352,18 +352,20 @@ public class Gui extends Application{
 		
 		//check if enough plates can be removed
 		int amountOfValue = from.getAmount(lsba);
+//		
+//		if (amountOfValue < amount) {
+//			return false;
+//		}
 		
-		if (amountOfValue < amount) {
-			return false;
-		}
-		
-		int fromIndex = from.getPlates().size()-1-lsba;
+		int fromIndex = from.getPlates().size()-1;
 		List<Plate> platesToMove = new ArrayList<>();
-		for(int i = fromIndex, count=0; count<amount ;count++, i--) {
-			platesToMove.add(from.getPlates().get(i));
+		for(int i = fromIndex, count=0; count<amount; i--) {
+			if(!from.getPlates().get(i).isGhost()) {
+				platesToMove.add(from.getPlates().get(i));
+				from.removeOfValue(amount, from.getLSBAValue(), amountOfValue == amount);				
+				count++;
+			}
 		}
-		
-		from.removeOfValue(amount, lsba, amountOfValue == amount);
 		
 		//if there are only ghosts on this tower, remove them
 		from.clearGhostTower();
