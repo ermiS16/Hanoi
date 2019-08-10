@@ -43,7 +43,7 @@ public class TowerSet {
 		}
 	}
 	
-	public static int getDefaultNumberSystem() {
+	public int getDefaultNumberSystem() {
 		return DEFAULT_NUMBER_SYSTEM;
 	}
 	public static int getDefaultHeight() {

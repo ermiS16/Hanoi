@@ -12,7 +12,8 @@ public class App{
 	private int numberSystem;
 
 	public App() {
-		towerSet = new TowerSet();
+		this.towerSet = new TowerSet();
+		this.numberSystem = towerSet.getDefaultNumberSystem();
 	}
 
 	public App(int amountTowers, int towerHeight, int numberSystem) {

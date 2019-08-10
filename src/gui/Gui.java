@@ -90,6 +90,7 @@ public class Gui extends Application{
 	private int amountPlatesHit;
 	private Tower platesFrom;
 	private List<Plate> platesToMove;
+	private int platesPerWidth;
 //	private double towerPhysicalHeight;
 //	private double towerPhysicalWidth;
 	private final double SCALING_FACTOR_Y = 3;
@@ -179,14 +180,22 @@ public class Gui extends Application{
 			//Also begin on y-axis
 		final double towerHeight = WindowHeight/SCALING_FACTOR_Y;
 
+		platesPerWidth = app.getNumberSystem() - app.getTowerSet().getDefaultNumberSystem() ;
+		platesPerWidth += 1;
+		
 		double plateWidth = 150;
 		double plateHeight = 15;
-		
+		int counter = 0;
+		app.getTowerSet().getDefaultNumberSystem();
 		for(Tower t : this.towerSet) {
 			t.setPhysicalParameters(towerHeight, towerWidth);
 			for(Plate p : t.getPlates()) {
+				counter++;
 				p.setPhysicalParameters(plateWidth, plateHeight);
-				plateWidth *= SCALING_FACTOR_PLATE;
+				if(counter == platesPerWidth) {
+					plateWidth *= SCALING_FACTOR_PLATE;
+					counter = 0;
+				}
 			}
 		}
 	}
@@ -195,10 +204,57 @@ public class Gui extends Application{
 	 * Creates an Application with standard values for the Towers.
 	 * @return the current Application
 	 */
-	public App createScene(){
+	private App createScene(){
 		App application = new App();
 		return application;
 	}
+
+//-------------------Helper Methods--------------//
+	
+	private void addPlateToMove(Plate p) {
+		this.platesToMove.add(p);
+	}
+
+	private List<Plate> getPlateToMove(){
+		return this.platesToMove;
+	}
+
+	private void removePlateToMove(Plate p) {
+		if(this.platesToMove.contains(p)) this.platesToMove.remove(p);
+	}
+
+	private void removePlateToMoveAll(List<Plate> plates) {
+		this.platesToMove.removeAll(plates);
+	}
+	
+	private int getAmountPlatesHit() {
+		return this.amountPlatesHit;
+	}
+	
+	private void increaseAmountPlatesHit() {
+		this.amountPlatesHit++;
+	}
+	
+	private void decreaseAmountPlatesHit() {
+		if(this.amountPlatesHit > 0) this.amountPlatesHit--;
+	}
+	
+	private void resetAmountPlatesHit() {
+		this.amountPlatesHit = 0;
+	}
+	
+	private void platesFrom(Tower t) {
+		this.platesFrom = t;
+	}
+	
+	private void resetPlatesFrom() {
+		this.platesFrom = null;
+	}
+	
+	private Tower getPlatesFrom() {
+		return this.platesFrom;
+	}
+//----------------------------------------------------//
 	
 	/**
 	 * Draws all Towers from a TowerSet with its containing Plates
@@ -325,51 +381,8 @@ public class Gui extends Application{
 		}
 	}
 	
-	public void addPlateToMove(Plate p) {
-		this.platesToMove.add(p);
-	}
-	public void addPlatesToMove(List<Plate> plates) {
-		this.platesToMove.addAll(plates);
-	}
-	public List<Plate> getPlateToMove(){
-		return this.platesToMove;
-	}
-	public void removePlateToMove(Plate p) {
-		if(this.platesToMove.contains(p)) this.platesToMove.remove(p);
-	}
-	public void removePlateToMoveAll(List<Plate> plates) {
-		this.platesToMove.removeAll(plates);
-	}
 	
-	public int getAmountPlatesHit() {
-		return this.amountPlatesHit;
-	}
-	
-	public void increaseAmountPlatesHit() {
-		this.amountPlatesHit++;
-	}
-	
-	public void decreaseAmountPlatesHit() {
-		if(this.amountPlatesHit > 0) this.amountPlatesHit--;
-	}
-	
-	public void resetAmountPlatesHit() {
-		this.amountPlatesHit = 0;
-	}
-	
-	public void platesFrom(Tower t) {
-		this.platesFrom = t;
-	}
-	
-	public void resetPlatesFrom() {
-		this.platesFrom = null;
-	}
-	
-	public Tower getPlatesFrom() {
-		return this.platesFrom;
-	}
-	
-	public boolean movePlates(Tower from, Tower to, List<Plate> plateMoveList) {
+	private boolean movePlates(Tower from, Tower to, List<Plate> plateMoveList) {
 		boolean moved = false;
 		int platesAmount = platesToMove.size();
 		if (to == from) {
@@ -385,14 +398,13 @@ public class Gui extends Application{
 			return false;
 		}
 		
-		
 		//check if enough plates can be removed
 		int amountOfValue = from.getAmount(lsba);
 //		
 //		if (amountOfValue < amount) {
 //			return false;
 //		}
-		
+				
 		List<Plate> moveList = new ArrayList<>();
 		if(movable(from, getPlateToMove())) {
 			for(Plate p : getPlateToMove()) {
@@ -400,6 +412,7 @@ public class Gui extends Application{
 				p.getHitbox().setHit(false);
 				moveList.add(p);
 			}
+
 			//if there are only ghosts on this tower, remove them
 			from.clearGhostTower();
 			
@@ -419,49 +432,47 @@ public class Gui extends Application{
 			removePlateToMoveAll(getPlateToMove());
 			moved = false;
 		}
-					
-//		int fromIndex = from.getPlates().size()-1;
-//		List<Plate> moveList = new ArrayList<>();
-		
-		//Calculates all Plates, that has to be moved		
-//		for(int i = fromIndex, count=0; count<platesAmount; i--) {
-//			if(!from.getPlates().get(i).isGhost()) {
-//				//Remove Hit
-//				from.getPlates().get(i).getHitbox().setHit(false);
-//				//Add Plate to Movelist
-//				platesToMove.add(from.getPlates().get(i));
-//				//Remove the Value of the Plate from the Tower.
-//				from.removeOfValue(platesAmount, from.getLSBAValue(), amountOfValue == platesAmount);				
-//				count++;
-//			}
-//		}
 		return moved;
 	}
 			
-	public boolean hitMatch(Hitbox hitbox, double x, double y) {
+	/**
+	 * Checks if a Hitbox is Hit by the Cursor.
+	 * @param hitbox The Hitbox to be checked
+	 * @param x Coordinate on X-Axis
+	 * @param y Coordinate on y-Axis
+	 * @return true if Hit, false otherwise
+	 */
+	private boolean hitMatch(Hitbox hitbox, double x, double y) {
 		if(hitbox.contains(x, y)) return true;
 		else return false;
 	}
-	
-//	
-	public static void sortPlatesToMove(List<Plate> list) {
-		
-	}
-	
-	public boolean movable(Tower tower, List<Plate> plateList) {
+
+	/**
+	 * Checks if a List of Plates is Moable as a whole from a certain Tower
+	 * @param tower whose Plates shall be checked
+	 * @param plateList List of Plates, that shall be moved.
+	 * @return true if Plates can be moved as a whole, false otherwise.
+	 */
+	private boolean movable(Tower tower, List<Plate> plateList) {
 		PlateComperator sortingOrder = new PlateComperator();
 		plateList.sort(sortingOrder.PLATE_SORTING_ORDER);
+		
+		//Value of Plate on the Top.
 		int lsba = tower.getLSBAValue();
 		boolean movable = true;
-		if(tower.getPlates().size() == 1) movable = true;
+		
+		//Special Cases
+		if(tower.getPlates().size() < plateList.size()) return false;
+		else if(tower.getPlates().size() < 1) return false;
+		else if(tower.getPlates().size() == 1) return true;
+		
+		//Iterates from the Plate on the Top down, to check if following plates
+		//are Contained in the List of Plates, that has to move.
 		else {
 			for(int i=lsba, k=tower.getPlates().size()-1 ;i<plateList.size();i++, k--) {
 				if(plateList.get(i) != tower.getPlates().get(k)) {
 					movable = false;
 				}
-//				if(!plateList.contains(tower.getPlates().get(i))) {
-//					movable = false;
-//				}
 			}
 		}
 		return movable;
