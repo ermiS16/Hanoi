@@ -2,13 +2,18 @@ package gui;
 
 import main.App;
 import logic.hanoi.Plate;
+import logic.hanoi.PlateComperator;
 import logic.hanoi.Tower;
 import logic.hanoi.TowerSet;
+import logic.hanoi.PlateComperator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+
+import com.sun.xml.internal.bind.v2.model.annotation.Quick;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -84,6 +89,7 @@ public class Gui extends Application{
 	private Tower[] towerSet;
 	private int amountPlatesHit;
 	private Tower platesFrom;
+	private List<Plate> platesToMove;
 //	private double towerPhysicalHeight;
 //	private double towerPhysicalWidth;
 	private final double SCALING_FACTOR_Y = 3;
@@ -156,6 +162,7 @@ public class Gui extends Application{
 		
 		amountPlatesHit = 0;
 		platesFrom = null;
+		platesToMove = new ArrayList<>();
 		app = createScene();
 		setInitObjects(app);
 	}
@@ -225,7 +232,8 @@ public class Gui extends Application{
 		
 		//Draw all Towers
 		for(Tower t : this.towerSet) {
-			gc.setFill(Color.BLACK);
+			gc.setFill(Color.BROWN);
+//			if(t.getHitbox().isHit()) gc.setFill(Color.ALICEBLUE);
 			
 			//Hitbox for ClickEvents
 			t.getHitbox().setHitbox(newX, newX+t.getPhysicalWidth(),
@@ -288,8 +296,9 @@ public class Gui extends Application{
 //			gc.setLineWidth(height);
 			
 			for(Plate p : plateList) {
+				gc.setFill(Color.RED);
+				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
 				if(p.isGhost()) gc.setFill(Color.GRAY);
-				else gc.setFill(Color.BLACK);
 				
 				//Set Color if Hitbox is hit
 //				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
@@ -316,12 +325,32 @@ public class Gui extends Application{
 		}
 	}
 	
+	public void addPlateToMove(Plate p) {
+		this.platesToMove.add(p);
+	}
+	public void addPlatesToMove(List<Plate> plates) {
+		this.platesToMove.addAll(plates);
+	}
+	public List<Plate> getPlateToMove(){
+		return this.platesToMove;
+	}
+	public void removePlateToMove(Plate p) {
+		if(this.platesToMove.contains(p)) this.platesToMove.remove(p);
+	}
+	public void removePlateToMoveAll(List<Plate> plates) {
+		this.platesToMove.removeAll(plates);
+	}
+	
 	public int getAmountPlatesHit() {
 		return this.amountPlatesHit;
 	}
 	
-	public void countAmountPlatesHit() {
+	public void increaseAmountPlatesHit() {
 		this.amountPlatesHit++;
+	}
+	
+	public void decreaseAmountPlatesHit() {
+		if(this.amountPlatesHit > 0) this.amountPlatesHit--;
 	}
 	
 	public void resetAmountPlatesHit() {
@@ -332,11 +361,17 @@ public class Gui extends Application{
 		this.platesFrom = t;
 	}
 	
+	public void resetPlatesFrom() {
+		this.platesFrom = null;
+	}
+	
 	public Tower getPlatesFrom() {
 		return this.platesFrom;
 	}
 	
-	public boolean movePlates(Tower from, Tower to, int amount) {
+	public boolean movePlates(Tower from, Tower to, List<Plate> plateMoveList) {
+		boolean moved = false;
+		int platesAmount = platesToMove.size();
 		if (to == from) {
 			System.out.println("same");
 			return false;
@@ -350,6 +385,7 @@ public class Gui extends Application{
 			return false;
 		}
 		
+		
 		//check if enough plates can be removed
 		int amountOfValue = from.getAmount(lsba);
 //		
@@ -357,29 +393,80 @@ public class Gui extends Application{
 //			return false;
 //		}
 		
-		int fromIndex = from.getPlates().size()-1;
-		List<Plate> platesToMove = new ArrayList<>();
-		for(int i = fromIndex, count=0; count<amount; i--) {
-			if(!from.getPlates().get(i).isGhost()) {
-				platesToMove.add(from.getPlates().get(i));
-				from.removeOfValue(amount, from.getLSBAValue(), amountOfValue == amount);				
-				count++;
+		List<Plate> moveList = new ArrayList<>();
+		if(movable(from, getPlateToMove())) {
+			for(Plate p : getPlateToMove()) {
+				from.removeOfValue(platesAmount, from.getLSBAValue(), amountOfValue == platesAmount);
+				p.getHitbox().setHit(false);
+				moveList.add(p);
 			}
+			//if there are only ghosts on this tower, remove them
+			from.clearGhostTower();
+			
+			//add plates to receiving tower
+			to.addPlates(lsba, platesAmount, moveList);
+			
+			//Remove all Plates that has moved
+			removePlateToMoveAll(getPlateToMove());
+			
+			//
+			from.recalculate();
+			to.recalculate();
+
+			moved = true;
+
+		}else {
+			removePlateToMoveAll(getPlateToMove());
+			moved = false;
 		}
+					
+//		int fromIndex = from.getPlates().size()-1;
+//		List<Plate> moveList = new ArrayList<>();
 		
-		//if there are only ghosts on this tower, remove them
-		from.clearGhostTower();
-		
-		//add plates to receiving tower
-		to.addPlates(lsba, amount, platesToMove);
-		
-		//
-		from.recalculate();
-		to.recalculate();
-		
-		return true;
+		//Calculates all Plates, that has to be moved		
+//		for(int i = fromIndex, count=0; count<platesAmount; i--) {
+//			if(!from.getPlates().get(i).isGhost()) {
+//				//Remove Hit
+//				from.getPlates().get(i).getHitbox().setHit(false);
+//				//Add Plate to Movelist
+//				platesToMove.add(from.getPlates().get(i));
+//				//Remove the Value of the Plate from the Tower.
+//				from.removeOfValue(platesAmount, from.getLSBAValue(), amountOfValue == platesAmount);				
+//				count++;
+//			}
+//		}
+		return moved;
 	}
 			
+	public boolean hitMatch(Hitbox hitbox, double x, double y) {
+		if(hitbox.contains(x, y)) return true;
+		else return false;
+	}
+	
+//	
+	public static void sortPlatesToMove(List<Plate> list) {
+		
+	}
+	
+	public boolean movable(Tower tower, List<Plate> plateList) {
+		PlateComperator sortingOrder = new PlateComperator();
+		plateList.sort(sortingOrder.PLATE_SORTING_ORDER);
+		int lsba = tower.getLSBAValue();
+		boolean movable = true;
+		if(tower.getPlates().size() == 1) movable = true;
+		else {
+			for(int i=lsba, k=tower.getPlates().size()-1 ;i<plateList.size();i++, k--) {
+				if(plateList.get(i) != tower.getPlates().get(k)) {
+					movable = false;
+				}
+//				if(!plateList.contains(tower.getPlates().get(i))) {
+//					movable = false;
+//				}
+			}
+		}
+		return movable;
+	}
+	
 	/**
 	 * Start for the GUI
 	 * Interface for Useractivity
@@ -462,8 +549,9 @@ public class Gui extends Application{
 
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e) {
-					boolean towerHit = false;
+					boolean moved = false;
 					Tower from = null;
+//					List<Plate> platesToMove = new ArrayList<>();
 					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 					gc.setFill(Color.BLACK);
 					gc.fillOval(e.getX()-5, e.getY()-5, 10, 10);
@@ -471,29 +559,43 @@ public class Gui extends Application{
 					int plateIndex = 1;
 					for(Tower t : towerSet) {
 						if(!t.getPlates().isEmpty()) {
+							if(t == getPlatesFrom() || getPlatesFrom() == null) {
 							for(Plate p : t.getPlates()) {
-								if(p.getHitbox().contains(e.getX(), e.getY())) {
+								//Checks if Hitbox of a Plate is hit
+								if(hitMatch(p.getHitbox(), e.getX(), e.getY())) {
+									//Checks if Plates already Hit
 									if(!p.getHitbox().isHit()) {
+										//Saves Tower, from which Plate shall be moved.
 										platesFrom(t);
+										//Set Hit for Hitbox on true
 										p.getHitbox().setHit(true);
-										countAmountPlatesHit();
+										increaseAmountPlatesHit();
+										addPlateToMove(p);
 									}
 									else {
 										p.getHitbox().setHit(false);
+										decreaseAmountPlatesHit();
+										removePlateToMove(p);	
 									}
 								}
 								plateIndex++;
 							}
 						}
-						if(t.getHitbox().contains(e.getX(), e.getY())) {
-							if(!t.getHitbox().isHit()) {
+						}
+						
+						if(hitMatch(t.getHitbox(), e.getX(), e.getY())) {
+							if(!t.getHitbox().isHit() && getAmountPlatesHit()!=0) {
 								t.getHitbox().setHit(true);
 								from = getPlatesFrom();
-								movePlates(from, t, getAmountPlatesHit());
-//								from.movePlates(t, getAmountPlatesHit());
-								resetAmountPlatesHit();
-								t.getHitbox().setHit(false);
-								from.getHitbox().setHit(false);
+								moved = movePlates(from, t, getPlateToMove());
+								if(moved) {
+									resetAmountPlatesHit();
+									t.getHitbox().setHit(false);
+									from.getHitbox().setHit(false);
+									resetPlatesFrom();
+								}else {
+									t.getHitbox().setHit(false);
+								}
 							}
 							else t.getHitbox().setHit(false);
 						}

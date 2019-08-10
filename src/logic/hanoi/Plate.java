@@ -8,7 +8,7 @@ import gui.Hitbox;
  * @author Jonathan
  * @version 1.0
  */
-public class Plate {
+public class Plate implements Comparable<Object>{
 	
 	private final double WIDTH_FACTOR = .7;
 	
@@ -90,5 +90,21 @@ public class Plate {
 	 */
 	public Plate ghostClone() {
 		return new Plate(value, true);
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		int compare = 0;
+		try { 
+			if(o instanceof Plate) {
+				Plate obj = (Plate) o;
+				if (obj.getValue() == this.getValue()) compare = 0;
+				else if(obj.getValue() < this.getValue()) compare = -1;
+				else if(obj.getValue() > this.getValue()) compare = 1;
+			}
+		} catch(ClassCastException e) {
+			e.printStackTrace();
+		}
+		return compare;
 	}
 }

@@ -249,6 +249,7 @@ public class Tower {
 				}
 			}
 		}
+		platesToMove.sort(PLATE_SORTING_ORDER);
 		for(Plate p : platesToMove) {
 			platesOnThisTower.add(p);
 		}
@@ -318,7 +319,6 @@ public class Tower {
 		//remove all plates (which are all ghosts) from this tower
 		platesOnThisTower = new ArrayList<Plate>();
 	}
-	
 	
 	/**
 	 * Sorts the plates on the tower. Should be called after every time plates are added or removed.
