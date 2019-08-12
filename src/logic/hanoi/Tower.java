@@ -17,7 +17,7 @@ import javafx.geometry.Point2D;
  */
 public class Tower {
 	private static final String EMPTY_REPRESENTATIVE = "0";
-
+	private static final int BINARAY_SYSTEM = 2;
 	
 	//determines the sorting oder on this tower
 	private static final Comparator<Plate> PLATE_SORTING_ORDER = new Comparator<Plate>() {
@@ -49,9 +49,9 @@ public class Tower {
 	 * numberSystem - 1 plates per width and height different widths, for a total of (numberSystem - 1) * height
 	 * plates.
 	 */
-	public Tower(int height, int numberSystem, boolean initWithPlates) {
+	public Tower(int height, boolean initWithPlates) {
 		this.logicalHeight = height;
-		this.numberSystem = numberSystem;
+//		this.numberSystem = numberSystem;
 		this.platesOnThisTower = new ArrayList<Plate>();
 		this.hitbox = new Hitbox();
 		this.pos = new Position();
@@ -63,10 +63,11 @@ public class Tower {
 			//create for each height...
 			for (int y = 0; y < height; y++) {
 				//...(numberSystem - 1) times a plate
-				for (int d = 0; d < numberSystem - 1; d++) {
-					//create a new plate from biggest to smallest
-					this.platesOnThisTower.add(new Plate(y));
-				}
+//				for (int d = 0; d < numberSystem - 1; d++) {
+//					//create a new plate from biggest to smallest
+//					this.platesOnThisTower.add(new Plate(y));
+//				}
+				this.platesOnThisTower.add(new Plate(y));
 			}
 		}
 		
@@ -230,25 +231,25 @@ public class Tower {
 		if (amount < 1) {
 			return;
 		}
-		if (platesOnThisTower.isEmpty()) { //if there are no plates on this tower, ghosts might need to be added
-			for (int i = value - 1; i >= 0; i--) {
-//				double width = platesToMove.get(i).getPhysicalWidth();
-//				double height = platesToMove.get(i).getPhysicalHeight();
-				platesOnThisTower.add(new Plate(i, true));
-			}
-		} else { //if there plates on this tower, there might be a ghost that needs to be removed
-			//if a ghost of given value exists, remove
-			Iterator<Plate> plateIterator = platesOnThisTower.iterator();
-			
-			while (plateIterator.hasNext()) {
-				Plate current = plateIterator.next();
-				
-				if (current.getValue() == value && current.isGhost()) {
-					platesOnThisTower.remove(current);
-					break;
-				}
-			}
-		}
+//		if (platesOnThisTower.isEmpty()) { //if there are no plates on this tower, ghosts might need to be added
+//			for (int i = value - 1; i >= 0; i--) {
+////				double width = platesToMove.get(i).getPhysicalWidth();
+////				double height = platesToMove.get(i).getPhysicalHeight();
+//				platesOnThisTower.add(new Plate(i, true));
+//			}
+//		} else { //if there plates on this tower, there might be a ghost that needs to be removed
+//			//if a ghost of given value exists, remove
+//			Iterator<Plate> plateIterator = platesOnThisTower.iterator();
+//			
+//			while (plateIterator.hasNext()) {
+//				Plate current = plateIterator.next();
+//				
+//				if (current.getValue() == value && current.isGhost()) {
+//					platesOnThisTower.remove(current);
+//					break;
+//				}
+//			}
+//		}
 		platesToMove.sort(PLATE_SORTING_ORDER);
 		for(Plate p : platesToMove) {
 			platesOnThisTower.add(p);
@@ -290,7 +291,7 @@ public class Tower {
 			
 			if (current.getValue() == value && !current.isGhost()) {
 				if (retainGhost) {
-					platesOnThisTower.add(current.ghostClone());
+//					platesOnThisTower.add(current.ghostClone());
 					retainGhost = false;
 				}
 				platesToRemove.add(current);
@@ -350,7 +351,6 @@ public class Tower {
 			if (p.isGhost()) {
 				continue;
 			}
-			
 			valueCount[p.getValue()] += 1;
 		}
 		
@@ -358,7 +358,7 @@ public class Tower {
 		
 		for (int i = 0; i < valueCount.length; i++) {
 			//add value of one digit
-			this.value += valueCount[i] * Math.pow(this.numberSystem, i);
+			this.value += valueCount[i] * Math.pow(BINARAY_SYSTEM, i);
 			
 			//add to representation
 			representationBuilder.append(valueCount[i]);

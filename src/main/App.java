@@ -13,14 +13,16 @@ public class App{
 
 	public App() {
 		this.towerSet = new TowerSet();
-		this.numberSystem = towerSet.getDefaultNumberSystem();
+		this.numberSystem = TowerSet.getDefaultNumberSystem();
+		this.amountTowers = TowerSet.getDefaultAmount();
+		this.towerHeight = TowerSet.getDefaultHeight();
 	}
 
-	public App(int amountTowers, int towerHeight, int numberSystem) {
+	public App(int amountTowers, int towerHeight) {
 		this.amountTowers = amountTowers;
 		this.towerHeight = towerHeight;
-		this.numberSystem = numberSystem;
-		this.towerSet = new TowerSet(amountTowers, towerHeight, numberSystem);
+//		this.numberSystem = numberSystem;
+		this.towerSet = new TowerSet(amountTowers, towerHeight);
 	}
 	
 	public int getAmountTowers() {

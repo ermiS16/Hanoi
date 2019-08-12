@@ -80,4 +80,5 @@ public class Hitbox {
 	public boolean contains(double x, double y) {
 		return this.hitbox.contains(x, y);
 	}
+	
 }

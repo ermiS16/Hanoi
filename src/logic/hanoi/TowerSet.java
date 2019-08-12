@@ -21,7 +21,7 @@ public class TowerSet {
 	 * number system to binary (2).
 	 */
 	public TowerSet() {
-		this(DEFAULT_TOWER_AMOUNT, DEFAULT_TOWER_LOCIGAL_HEIGHT, DEFAULT_NUMBER_SYSTEM);
+		this(DEFAULT_TOWER_AMOUNT, DEFAULT_TOWER_LOCIGAL_HEIGHT);
 	}
 	
 	/**
@@ -35,15 +35,15 @@ public class TowerSet {
 	 * Mind that there is a total of (numberSystem - 1) * towerHeight plates (plus potential ghost plates). The first
 	 * tower will have all plates, all other towers none.
 	 */
-	public TowerSet(int towerAmount, int towerLogicalHeight, int numberSystem) {
+	public TowerSet(int towerAmount, int towerLogicalHeight) {
 		this.towers = new Tower[towerAmount];
 		
 		for (int i = 0; i < towers.length; i++) {
-			this.towers[i] = new Tower(towerLogicalHeight, numberSystem, i == 0);
+			this.towers[i] = new Tower(towerLogicalHeight, i == 0);
 		}
 	}
 	
-	public int getDefaultNumberSystem() {
+	public static int getDefaultNumberSystem() {
 		return DEFAULT_NUMBER_SYSTEM;
 	}
 	public static int getDefaultHeight() {

@@ -18,6 +18,8 @@ import com.sun.xml.internal.bind.v2.model.annotation.Quick;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -30,6 +32,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -37,6 +40,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Slider;
 import javafx.scene.canvas.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -77,12 +81,23 @@ public class Gui extends Application{
 	private GridPane newEntryWindow;
 
 	// User pick Elemets
-	private Separator seperator;
+	private Slider bitWidth;
+	private Label bitWidthValue;
+	private Slider amountTower;
+	private Label amountTowerValue;
+	private Separator separator0;
+	private Separator separator1;
+	private Separator separator2;
+	private Separator separator3;
 	private Button newEntryOk;
 	private Button newEntryCancel;
 	private TextField varAmountTowers;
-	private TextField varNumber;
-	private ComboBox<String> pickNumberSystem;
+	private Label labelAmountTowers;
+	private Label labelBitWidth;
+	private Label labelNumber;
+	private TextField varBitWidth;
+	private Label varNumber;
+//	private ComboBox<String> pickNumberSystem;
 
 	// Necessary Stuff
 	private App app;
@@ -90,11 +105,7 @@ public class Gui extends Application{
 	private int amountPlatesHit;
 	private Tower platesFrom;
 	private List<Plate> platesToMove;
-	private int platesPerWidth;
-//	private double towerPhysicalHeight;
-//	private double towerPhysicalWidth;
 	private final double SCALING_FACTOR_Y = 3;
-	private final double SCALING_FACTOR_PLATE = .7;
 	
 	/**
 	 * Initialization of GUI Elements.
@@ -110,25 +121,76 @@ public class Gui extends Application{
 //		//For New Entry
 		newEntryWindow = new GridPane();
 		varAmountTowers = new TextField();
-		varAmountTowers.setPromptText("Anzahl der Tuerme");
-		varNumber = new TextField();
-		varNumber.setPromptText("Zahl");
-		pickNumberSystem = new ComboBox<>(FXCollections.observableArrayList(
-				"2","3","4","5","6","7","8","9",
-				"10","11","12","13","14","15","16"));
-		pickNumberSystem.setValue(pickNumberSystem.getItems().get(0));
+		varAmountTowers.setPromptText("max: 6");
+		varBitWidth = new TextField();
+		varBitWidth.setPromptText("max: 8");
+//		pickNumberSystem = new ComboBox<>(FXCollections.observableArrayList(
+//				"2","3","4","5","6","7","8","9",
+//				"10","11","12","13","14","15","16"));
+//		pickNumberSystem.setValue(pickNumberSystem.getItems().get(0));
+		varNumber = new Label("7");
+		
+		bitWidth = new Slider();
+		bitWidth.setMax(8);
+		bitWidth.setMin(3);
+		bitWidth.setShowTickMarks(true);
+		bitWidth.setShowTickLabels(true);
+		bitWidth.setMinorTickCount(1);
+		bitWidth.setMajorTickUnit(1);
+		bitWidth.setValue(3);
+		bitWidth.setBlockIncrement(1);
+		bitWidthValue = new Label(""+bitWidth.getMin());
+		
+		amountTower = new Slider();
+		amountTower.setMax(6);
+		amountTower.setMin(3);
+		amountTower.setShowTickMarks(true);
+		amountTower.setShowTickLabels(true);
+		amountTower.setMinorTickCount(1);
+		amountTower.setMajorTickUnit(1);
+		amountTower.setValue(3);
+		amountTower.setBlockIncrement(1);
+		amountTowerValue = new Label(""+amountTower.getMin());
+		
+		labelAmountTowers = new Label("Anzahl Tuerme: ");
+		labelBitWidth = new Label("Bitbreite: ");
+		labelNumber = new Label("Groeßte Zahl: ");
 		
 		newEntryOk = new Button ("OK");
 		newEntryCancel = new Button("Cancel");
-		seperator = new Separator();
-		seperator.setPrefHeight(50);
+		separator0 = new Separator();
+		separator0.setMinHeight(10);
+		separator0.visibleProperty().setValue(false);
 		
-		newEntryWindow.add(varAmountTowers, 0, 0);
-		newEntryWindow.add(varNumber,0, 1);
-		newEntryWindow.add(pickNumberSystem, 0, 2);
-		newEntryWindow.add(seperator,0, 3);
-		newEntryWindow.add(newEntryOk, 0, 4);
-		newEntryWindow.add(newEntryCancel, 1, 4);
+		newEntryWindow.add(separator0, 0, 0);
+		newEntryWindow.add(labelAmountTowers, 0, 1);
+		newEntryWindow.add(amountTower, 1, 1);
+		newEntryWindow.add(amountTowerValue, 2, 1);
+
+		separator1 = new Separator();
+		separator1.setMinHeight(20);
+		separator1.visibleProperty().setValue(false);
+		newEntryWindow.add(separator1, 0, 2);
+		
+		newEntryWindow.add(labelBitWidth, 0, 3);
+		newEntryWindow.add(bitWidth, 1, 3);
+		newEntryWindow.add(bitWidthValue, 2, 3);
+		
+		separator2 = new Separator();
+		separator2.setMinHeight(20);
+		separator2.visibleProperty().setValue(false);
+		newEntryWindow.add(separator2, 0, 4);
+		
+		newEntryWindow.add(labelNumber, 0, 5);
+		newEntryWindow.add(varNumber, 1, 5);
+		
+//		newEntryWindow.add(pickNumberSystem, 0, 2);
+		separator3 = new Separator();
+		separator3.setMinHeight(30);
+		separator3.visibleProperty().setValue(false);
+		newEntryWindow.add(separator3,0, 6);
+		newEntryWindow.add(newEntryOk, 0, 7);
+		newEntryWindow.add(newEntryCancel, 1, 7);
 
 		//Mouse Context Menu
 		mouseContextMenu = new ContextMenu();
@@ -179,24 +241,20 @@ public class Gui extends Application{
 		final double towerWidth = 20;
 			//Also begin on y-axis
 		final double towerHeight = WindowHeight/SCALING_FACTOR_Y;
-
-		platesPerWidth = app.getNumberSystem() - app.getTowerSet().getDefaultNumberSystem() ;
-		platesPerWidth += 1;
+				
+		double plateWidth = Plate.getMaxWidth();
+		double plateHeight = Plate.getHeight();
+		double WidthMaxMinDiff = Plate.getMaxWidth() - Plate.getMinWidth();
 		
-		double plateWidth = 150;
-		double plateHeight = 15;
-		int counter = 0;
-		app.getTowerSet().getDefaultNumberSystem();
+		//Calculates the right width for the Plate
+		double widthScalingStep = WidthMaxMinDiff/app.getTowerHeight();
 		for(Tower t : this.towerSet) {
 			t.setPhysicalParameters(towerHeight, towerWidth);
 			for(Plate p : t.getPlates()) {
-				counter++;
+
 				p.setPhysicalParameters(plateWidth, plateHeight);
-				if(counter == platesPerWidth) {
-					plateWidth *= SCALING_FACTOR_PLATE;
-					counter = 0;
+				plateWidth -= widthScalingStep;
 				}
-			}
 		}
 	}
 	
@@ -289,7 +347,6 @@ public class Gui extends Application{
 		//Draw all Towers
 		for(Tower t : this.towerSet) {
 			gc.setFill(Color.BROWN);
-//			if(t.getHitbox().isHit()) gc.setFill(Color.ALICEBLUE);
 			
 			//Hitbox for ClickEvents
 			t.getHitbox().setHitbox(newX, newX+t.getPhysicalWidth(),
@@ -297,10 +354,7 @@ public class Gui extends Application{
 			
 			//Save Position for Tower
 			t.getPosition().setPosition(newX, newY);
-			
-//			//Save Physical Height and Width for Tower
-//			t.setPhysicalParameters(towerPhysicalHeight, towerPhysicalWidth);
-			
+					
 			//Draw new Tower
 			if(t.getHitbox().isHit()) gc.setFill(Color.YELLOW);
 			gc.setLineWidth(t.getPhysicalWidth());
@@ -310,8 +364,14 @@ public class Gui extends Application{
 			gc.setLineWidth(0.1);
 			gc.strokeText("Tower "+towerIndex, newX-textCenterOffset,
 					newY+t.getPhysicalHeight()+textGap);
+			
+			//Represantation of Tower in Bits
 			gc.strokeText(t.getRepresentation(), newX-textCenterOffset,
 				newY+t.getPhysicalHeight()+(textGap*2));
+			
+			//Represantation of Tower as Value
+			gc.strokeText(t.getValue()+"", newX-textCenterOffset, 
+					newY+t.getPhysicalHeight()+(textGap*3));
 			
 			drawPlates(gc, t);
 
@@ -321,10 +381,6 @@ public class Gui extends Application{
 			
 			towerIndex++;
 		}
-	}
-	
-	public void setHits(){
-		
 	}
 	
 	/**
@@ -341,9 +397,6 @@ public class Gui extends Application{
 
 			//Plate Attributes
 			double plateGap = 2;
-//			double width = 150;
-//			double height = 15;
-//			double plateWidthFactor = .7;
 			
 			//Initializing Startposition
 			double newX = 0;
@@ -352,16 +405,10 @@ public class Gui extends Application{
 //			gc.setLineWidth(height);
 			
 			for(Plate p : plateList) {
-				gc.setFill(Color.RED);
 				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
-				if(p.isGhost()) gc.setFill(Color.GRAY);
+				else if(p.isGhost()) gc.setFill(Color.GRAY);
+				else gc.setFill(Color.RED);
 				
-				//Set Color if Hitbox is hit
-//				if(p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
-				
-//				//Save Physical Height and Width for Tower
-//				p.setPhysicalParameters(width, height);
-//				
 				//Set the Position on the X-Axis
 				newX = tower.getPosition().getX()
 						+(tower.getPhysicalWidth()/2)-(p.getPhysicalWidth()/2);
@@ -375,7 +422,6 @@ public class Gui extends Application{
 						newY-p.getPhysicalHeight());
 
 				//Setting the new Startposition
-//				width *= plateWidthFactor;
 				newY -= p.getPhysicalHeight()+plateGap;
 			}
 		}
@@ -408,7 +454,7 @@ public class Gui extends Application{
 		List<Plate> moveList = new ArrayList<>();
 		if(movable(from, getPlateToMove())) {
 			for(Plate p : getPlateToMove()) {
-				from.removeOfValue(platesAmount, from.getLSBAValue(), amountOfValue == platesAmount);
+				from.removeOfValue(platesAmount, from.getLSBAValue(), false);
 				p.getHitbox().setHit(false);
 				moveList.add(p);
 			}
@@ -478,12 +524,31 @@ public class Gui extends Application{
 		return movable;
 	}
 	
+	public int calculateBitwidth(int number) {
+		int counter = 0;
+		while(number > 0) {
+			number >>= 1;
+			counter++;
+			System.out.println(counter);
+		}
+		return counter;
+	}
+	
+	public int calculateMaxNumber(double bitwidth) {
+		int max = 1;
+		max <<= (int) bitwidth;
+//		System.out.println(max-1);
+		return max-1;
+	}
+	
 	/**
 	 * Start for the GUI
 	 * Interface for Useractivity
 	 */
 	@Override
 	public void start(Stage primaryStage) {
+//		calculateBitwidth(16);
+		calculateMaxNumber(8);
 		
 		//Main Elements
 		GridPane root = new GridPane();
@@ -492,7 +557,26 @@ public class Gui extends Application{
 
 		root.add(menu, 0, 0);
 		root.add(showCase, 0, 1);
-		
+
+
+		bitWidth.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable,
+					Number oldValue, Number newValue) {
+				
+				bitWidthValue.setText(String.format("%.0f", newValue));
+				varNumber.setText(""+calculateMaxNumber(bitWidth.getValue()));
+//				varNumber.setPromptText(""+calculateMaxNumber(bitWidth.getValue()));
+			}
+		});
+		amountTower.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable,
+					Number oldValue, Number newValue) {
+				
+				amountTowerValue.setText(String.format("%.0f", newValue));
+			}
+		});		
 		//Show mouse context menu on right click.
 		showCase.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
 			public void handle(ContextMenuEvent e) {
@@ -504,15 +588,14 @@ public class Gui extends Application{
 		reset.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
 				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
-				for(Tower t : towerSet) {
-					t.getHitbox().setHit(false);
-				}
+				app = new App(app.getAmountTowers(), app.getTowerHeight());
+				setInitObjects(app);
 			}
 		});
 
 		
 		Stage newWindow = new Stage();
-		newWindow.setScene(new Scene(newEntryWindow,200,200));
+		newWindow.setScene(new Scene(newEntryWindow,350,250));
 		newEntry.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
 				newWindow.show();
@@ -522,19 +605,20 @@ public class Gui extends Application{
 						gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 						
 						//Read Input
-						String amountTowersString = varAmountTowers.getCharacters().toString();
-						String numberString = varNumber.getCharacters().toString();
-						String pickedSystemString = pickNumberSystem.getValue().toString();
+						String amountTowersString = String.valueOf(amountTower.getValue());
+						String bitWidthString = String.valueOf(bitWidth.getValue());
+						String userNumberString = varNumber.getText();
 						
 						//Checks if Input is a Integer.
 						try {
 							//Parse Input into real Numbers if possible
-							int amountTowers = Integer.parseInt(amountTowersString);
-							int number = Integer.parseInt(numberString);
-							int pickedSystem = Integer.parseInt(pickedSystemString);
+							int amountTowers = (int) Double.parseDouble(amountTowersString);
+							int newBitWidth = (int) Double.parseDouble(bitWidthString);
+//							int newNumber = Integer.parseInt(userNumberString);
 							
 							//Creating a new App and initializie it
-							app = new App(amountTowers, number, pickedSystem);
+							app = new App(amountTowers,
+									newBitWidth);
 							setInitObjects(app);
 							newWindow.close();
 	
@@ -546,6 +630,7 @@ public class Gui extends Application{
 							invalidInput.setTitle("Warnung!");
 							invalidInput.setHeaderText("Falsche Eingabe");
 							invalidInput.show();
+							exception.printStackTrace();
 						}
 					}
 				});
@@ -586,7 +671,8 @@ public class Gui extends Application{
 									else {
 										p.getHitbox().setHit(false);
 										decreaseAmountPlatesHit();
-										removePlateToMove(p);	
+										removePlateToMove(p);
+										if(platesToMove.isEmpty()) platesFrom(null);
 									}
 								}
 								plateIndex++;
@@ -598,14 +684,18 @@ public class Gui extends Application{
 							if(!t.getHitbox().isHit() && getAmountPlatesHit()!=0) {
 								t.getHitbox().setHit(true);
 								from = getPlatesFrom();
-								moved = movePlates(from, t, getPlateToMove());
-								if(moved) {
-									resetAmountPlatesHit();
-									t.getHitbox().setHit(false);
-									from.getHitbox().setHit(false);
-									resetPlatesFrom();
-								}else {
-									t.getHitbox().setHit(false);
+								try {
+									moved = movePlates(from, t, getPlateToMove());
+									if(moved) {
+										resetAmountPlatesHit();
+										t.getHitbox().setHit(false);
+										from.getHitbox().setHit(false);
+										resetPlatesFrom();
+									}else {
+										t.getHitbox().setHit(false);
+									}
+								}catch(NullPointerException exception) {
+									exception.printStackTrace();
 								}
 							}
 							else t.getHitbox().setHit(false);
@@ -630,9 +720,9 @@ public class Gui extends Application{
 		info.setOnAction(new EventHandler<ActionEvent>() {
 			@Override public void handle(ActionEvent e) {
 				String contentText = "Autoren: Eric Misfeld, Jonathan Dransfeld\n"
-						+ "Version 0.5, 26.07.2019\n\n"
+						+ "Version 0.8, 12.08.2019\n\n"
 						+ "Dieses Programm veranschaunlicht das Zaehlen\n"
-						+ "in verschiedenen Zahlensystemen anhand der\n"
+						+ "im Binaersystem anhand der\n"
 						+ "Tuerme von Hanoi.";
 				Alert information = new Alert(AlertType.INFORMATION);
 				information.setTitle("Information");

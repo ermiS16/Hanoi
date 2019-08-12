@@ -10,7 +10,9 @@ import gui.Hitbox;
  */
 public class Plate implements Comparable<Object>{
 	
-	private final double WIDTH_FACTOR = .7;
+	private static final double MAXWIDTH = 150;
+	private static final double MINWIDTH = 30;
+	private static final double HEIGHT = 15;
 	
 	private int value;
 	private boolean ghost;
@@ -37,12 +39,22 @@ public class Plate implements Comparable<Object>{
 	 * @param value - the value of the new plate.
 	 * @param ghost - if true, this is marked as a ghost plate.
 	 */
-	public Plate(int value, boolean ghost) {
-		this.value = value;
-		this.ghost = ghost;
-		this.hitbox = new Hitbox();
-		this.physicalWidth = 0;
-		this.physicalHeight = 0;
+//	public Plate(int value, boolean ghost) {
+//		this.value = value;
+//		this.ghost = ghost;
+//		this.hitbox = new Hitbox();
+//		this.physicalWidth = 0;
+//		this.physicalHeight = 0;
+//	}
+	
+	public static double getMinWidth() {
+		return MINWIDTH;
+	}
+	public static double getMaxWidth() {
+		return MAXWIDTH;
+	}
+	public static double getHeight() {
+		return HEIGHT;
 	}
 	
 	public void setPhysicalParameters(double width, double height) {
@@ -70,7 +82,7 @@ public class Plate implements Comparable<Object>{
 	 * @return the value of this plate.
 	 */
 	public int getValue() {
-		return value;
+		return this.value;
 	}
 	
 	/**
@@ -79,7 +91,7 @@ public class Plate implements Comparable<Object>{
 	 * @return true if this plate is a ghost plate.
 	 */
 	public boolean isGhost() {
-		return ghost;
+		return this.ghost;
 	}
 	
 	
@@ -88,9 +100,11 @@ public class Plate implements Comparable<Object>{
 	 * 
 	 * @return a new ghost plate with same width.
 	 */
-	public Plate ghostClone() {
-		return new Plate(value, true);
-	}
+//	public Plate ghostClone() {
+//		Plate newPlate = new Plate(value, true);
+//		newPlate.setPhysicalParameters(this.physicalWidth, this.physicalHeight);
+//		return newPlate;
+//	}
 
 	@Override
 	public int compareTo(Object o) {
