@@ -11,5 +11,4 @@ public class PlateComperator {
 			return o1.getValue() - o2.getValue();
 		}
 	};
-	
 }

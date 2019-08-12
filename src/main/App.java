@@ -9,11 +9,11 @@ public class App{
 	private TowerSet towerSet;
 	private int amountTowers;
 	private int towerHeight;
-	private int numberSystem;
+//	private int numberSystem;
 
 	public App() {
 		this.towerSet = new TowerSet();
-		this.numberSystem = TowerSet.getDefaultNumberSystem();
+//		this.numberSystem = TowerSet.getDefaultNumberSystem();
 		this.amountTowers = TowerSet.getDefaultAmount();
 		this.towerHeight = TowerSet.getDefaultHeight();
 	}
@@ -21,7 +21,6 @@ public class App{
 	public App(int amountTowers, int towerHeight) {
 		this.amountTowers = amountTowers;
 		this.towerHeight = towerHeight;
-//		this.numberSystem = numberSystem;
 		this.towerSet = new TowerSet(amountTowers, towerHeight);
 	}
 	
@@ -30,9 +29,6 @@ public class App{
 	}
 	public int getTowerHeight() {
 		return this.towerHeight;
-	}
-	public int getNumberSystem() {
-		return this.numberSystem;
 	}
 	
 	public TowerSet getTowerSet() {

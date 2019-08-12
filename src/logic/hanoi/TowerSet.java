@@ -3,7 +3,7 @@ package logic.hanoi;
 /**
  * Represents a set of towers where plates can be moved from one to another.
  * 
- * @author Jonathan
+ * @author Jonathan, Eric
  * @version 1.0
  */
 public class TowerSet {
@@ -14,7 +14,6 @@ public class TowerSet {
 	//Default Values for Construction of a Tower Set
 	private final static int DEFAULT_TOWER_AMOUNT = 3;
 	private final static int DEFAULT_TOWER_LOCIGAL_HEIGHT = 3;
-	private final static int DEFAULT_NUMBER_SYSTEM = 2;
 	
 	/**
 	 * Creates a new set of Hanoi towers. The amount of towers default to 3, the tower height to 3 and the
@@ -43,9 +42,6 @@ public class TowerSet {
 		}
 	}
 	
-	public static int getDefaultNumberSystem() {
-		return DEFAULT_NUMBER_SYSTEM;
-	}
 	public static int getDefaultHeight() {
 		return DEFAULT_TOWER_LOCIGAL_HEIGHT;
 	}

@@ -15,7 +15,6 @@ public class Plate implements Comparable<Object>{
 	private static final double HEIGHT = 15;
 	
 	private int value;
-	private boolean ghost;
 	private Hitbox hitbox;
 	private double physicalWidth;
 	private double physicalHeight;
@@ -27,26 +26,11 @@ public class Plate implements Comparable<Object>{
 	 */
 	public Plate(int value) {
 		this.value = value;
-		this.ghost = false;
 		this.hitbox = new Hitbox();
 		this.physicalWidth = 0;
 		this.physicalHeight = 0;
 	}
-	
-	/**
-	 * Creates a new plate.
-	 * 
-	 * @param value - the value of the new plate.
-	 * @param ghost - if true, this is marked as a ghost plate.
-	 */
-//	public Plate(int value, boolean ghost) {
-//		this.value = value;
-//		this.ghost = ghost;
-//		this.hitbox = new Hitbox();
-//		this.physicalWidth = 0;
-//		this.physicalHeight = 0;
-//	}
-	
+		
 	public static double getMinWidth() {
 		return MINWIDTH;
 	}
@@ -84,27 +68,6 @@ public class Plate implements Comparable<Object>{
 	public int getValue() {
 		return this.value;
 	}
-	
-	/**
-	 * Returns whether or not this plate is a ghost plate.
-	 * 
-	 * @return true if this plate is a ghost plate.
-	 */
-	public boolean isGhost() {
-		return this.ghost;
-	}
-	
-	
-	/**
-	 * Creates a copy of this plate which will return true on isGhost.
-	 * 
-	 * @return a new ghost plate with same width.
-	 */
-//	public Plate ghostClone() {
-//		Plate newPlate = new Plate(value, true);
-//		newPlate.setPhysicalParameters(this.physicalWidth, this.physicalHeight);
-//		return newPlate;
-//	}
 
 	@Override
 	public int compareTo(Object o) {

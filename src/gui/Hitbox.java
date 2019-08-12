@@ -1,22 +1,13 @@
 package gui;
 
 import javafx.scene.shape.Rectangle;
-import javafx.geometry.Bounds;
 
 public class Hitbox {
 	
 	private Rectangle hitbox;
-//	private double xStart;
-//	private double xEnd;
-//	private double yStart;
-//	private double yEnd;
 	private boolean isHit;
 	
 	public Hitbox() {
-//		xStart = 0;
-//		xEnd = 0;
-//		yStart = 0;
-//		yEnd = 0;
 		hitbox = new Rectangle();
 	}
 	
@@ -27,12 +18,7 @@ public class Hitbox {
 	 * @param yStart Start on the y-Axis of the Canvas
 	 * @param yEnd End on the y-Axis of the Canvas
 	 */
-	public void setHitbox(double xStart, double xEnd, double yStart, double yEnd) {
-//		this.xStart = xStart;
-//		this.xEnd = xEnd;
-//		this.yStart = yStart;
-//		this.yEnd = yEnd;
-		
+	public void setHitbox(double xStart, double xEnd, double yStart, double yEnd) {		
 		double width = xEnd - xStart;
 		double height = yStart - yEnd;
 		this.hitbox = new Rectangle(xStart, yStart, width, height);
