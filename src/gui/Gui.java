@@ -1,13 +1,22 @@
 package gui;
 
 import main.App;
+import main.MenuFile;
 import logic.hanoi.Plate;
 import logic.hanoi.PlateComperator;
 import logic.hanoi.Tower;
 import logic.hanoi.TowerSet;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -17,6 +26,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -33,6 +44,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextArea;
 import javafx.scene.canvas.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -70,6 +82,11 @@ public class Gui extends Application {
 
 	// New Entry Windowelements
 	private GridPane newEntryWindow;
+	
+	//FileChooser
+	private FileChooser fileChooserOpen;
+	private FileChooser FileChooserSave;
+	private TextArea textArea;
 
 	// User pick Elemets
 	private Slider bitWidth;
@@ -208,6 +225,21 @@ public class Gui extends Application {
 		about.getItems().addAll(info, help);
 		menu.getMenus().addAll(file, settings, about);
 
+		//FileChooser
+		fileChooserOpen = new FileChooser();
+		fileChooserOpen.setTitle("Datei Auswaehlen");
+		fileChooserOpen.setInitialDirectory(new File(System.getProperty("user.home")));
+		fileChooserOpen.getExtensionFilters().addAll(
+							new FileChooser.ExtensionFilter("All Files", "*.*"),
+							new FileChooser.ExtensionFilter("Properties", "*.properties"));
+		textArea = new TextArea();
+		textArea.setMinHeight(70);
+
+		//DirectoryChooser
+		FileChooserSave = new FileChooser();
+		FileChooserSave.setTitle("Speicherort Auswaehlen");
+		FileChooserSave.setInitialDirectory(new File(System.getProperty("user.home")));
+		
 		amountPlatesHit = 0;
 		platesFrom = null;
 		platesToMove = new ArrayList<>();
@@ -241,6 +273,10 @@ public class Gui extends Application {
 				plateWidth -= widthScalingStep;
 			}
 		}
+	}
+	
+	public void restoreData(App app) {
+		this.app = app;
 	}
 
 	/**
@@ -508,7 +544,7 @@ public class Gui extends Application {
 		max <<= (int) bitlength;
 		return max - 1;
 	}
-
+	
 	/**
 	 * Start for the GUI Interface for Useractivity
 	 */
@@ -567,7 +603,7 @@ public class Gui extends Application {
 				newWindow.show();
 
 				newEntryOk.setOnAction(new EventHandler<ActionEvent>() {
-					@Override
+					@Override 
 					public void handle(ActionEvent e) {
 						gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 
@@ -600,19 +636,56 @@ public class Gui extends Application {
 				});
 
 				newEntryCancel.setOnAction(new EventHandler<ActionEvent>() {
-					@Override
+					@Override 
 					public void handle(ActionEvent ev) {
 						newWindow.close();
 					}
 				});
 			}
 		});
-
+		
+		save.setOnAction(new EventHandler<ActionEvent>() {
+			@Override 
+			public void handle(ActionEvent e) {
+//				MenuFile file = new MenuFile();
+				textArea.clear();
+				FileChooserSave.initialFileNameProperty().set("save.properties");
+				File dir = FileChooserSave.showSaveDialog(primaryStage);
+				if(dir != null) {
+					textArea.setText(dir.getAbsolutePath());
+					MenuFile.save(app.getAmountTowers(), app.getTowerHeight(),
+							app.getTowerSet(), dir.getAbsolutePath());
+				}else {
+					textArea.setText(null);
+				}
+			}
+		});
+		
+		open.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				textArea.clear();
+				List<File> files = new ArrayList<>();
+				File file = fileChooserOpen.showOpenDialog(primaryStage);
+				if(file != null) {
+//					files = Arrays.asList(file);
+					MenuFile menuFile = new MenuFile();
+					try {
+						app = MenuFile.open(file, app);	
+					}catch (NullPointerException npe) {
+						npe.printStackTrace();
+					}
+					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+					setInitObjects(app);
+					
+				}
+			}
+		});
+		
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				boolean moved = false;
 				Tower from = null;
-//					List<Plate> platesToMove = new ArrayList<>();
 				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 				gc.setFill(Color.BLACK);
 				gc.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
