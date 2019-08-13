@@ -1,5 +1,7 @@
 package main;
 
+import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,6 +12,11 @@ import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Properties;
 
+import javax.imageio.ImageIO;
+
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.image.WritableImage;
 import logic.hanoi.TowerSet;
 
 public class MenuFile {
@@ -24,6 +31,7 @@ public class MenuFile {
 		props.setProperty(BITLENGTH_KEY, ""+bitlength);
 		try {
 //			String path = getCurrentJarPath()+"props.properties";
+			if(!path.endsWith(".properties")) return false;
 			props.store(new FileOutputStream(path), "Tower props");
 			return true;
 		} catch (FileNotFoundException e1) {
@@ -51,11 +59,6 @@ public class MenuFile {
 		return null;
 	}
 	
-
-	public boolean saveAs(int amountTower, int bitlength) {
-		return true;
-	}
-	
 	public static App open(File file, App application) {
 		Properties props = new Properties();
 		String path = file.getAbsolutePath();
@@ -77,8 +80,29 @@ public class MenuFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new App(amountTower, bitlength);
-				
+		return new App(amountTower, bitlength);		
 	}	
+
+	public static boolean export(File file, Canvas can) {
+			int width = (int) can.getWidth();
+			int height = (int) can.getHeight();
+			String formatName = null;
+			String fileEnding = file.getName();
+			if(fileEnding.endsWith(".png")) formatName = "png";
+		try {
+			WritableImage writableImage = new WritableImage(width, height);
+			can.snapshot(null, writableImage);
+			RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+			ImageIO.write(renderedImage, formatName ,file);
+		}catch(IOException ioe) {
+			ioe.printStackTrace();
+		}catch(IllegalArgumentException iae) {
+			iae.printStackTrace();
+		}
+
+		
+		
+		return true;
+	}
 	
 }

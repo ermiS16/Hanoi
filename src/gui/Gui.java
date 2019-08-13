@@ -8,6 +8,7 @@ import logic.hanoi.Tower;
 import logic.hanoi.TowerSet;
 
 import java.awt.Desktop;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,11 +19,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import javax.imageio.ImageIO;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -37,6 +41,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.control.MenuBar;
@@ -57,9 +62,10 @@ public class Gui extends Application {
 
 	// Setting Attributes
 	private Rectangle2D screenBounds;
-	private double WindowWidth;
-	private double WindowHeight;
-	private boolean sameSession;
+	private double windowWidth;
+	private double windowHeight;
+	private boolean sameSave;
+	private boolean sameExport;
 
 	// Mouse Context Menu
 	private ContextMenu mouseContextMenu;
@@ -86,7 +92,8 @@ public class Gui extends Application {
 	
 	//FileChooser
 	private FileChooser fileChooserOpen;
-	private FileChooser FileChooserSave;
+	private FileChooser fileChooserSave;
+	private FileChooser fileChooserExport;
 	private TextArea textArea;
 
 	// User pick Elemets
@@ -115,6 +122,7 @@ public class Gui extends Application {
 	private List<Plate> platesToMove;
 	private final double SCALING_FACTOR_Y = 3;
 	private File saveDirectory;
+	private File exportDirectory;
 
 	/**
 	 * Initialization of GUI Elements.
@@ -124,9 +132,10 @@ public class Gui extends Application {
 
 		// Setting Window Resolution
 		screenBounds = Screen.getPrimary().getVisualBounds();
-		WindowWidth = screenBounds.getWidth() * REL_WINDOW_SIZE_FACTOR;
-		WindowHeight = screenBounds.getHeight() * REL_WINDOW_SIZE_FACTOR;
-		sameSession = false;
+		windowWidth = (screenBounds.getWidth() * REL_WINDOW_SIZE_FACTOR);
+		windowHeight = screenBounds.getHeight() * REL_WINDOW_SIZE_FACTOR;
+		sameSave = false;
+		sameExport = false;
 		
 //		//For New Entry
 		newEntryWindow = new GridPane();
@@ -228,22 +237,30 @@ public class Gui extends Application {
 		about.getItems().addAll(info, help);
 		menu.getMenus().addAll(file, settings, about);
 
-		//FileChooser
+		//FileChooser for Open
 		fileChooserOpen = new FileChooser();
 		fileChooserOpen.setTitle("Datei Auswaehlen");
 		fileChooserOpen.setInitialDirectory(new File(System.getProperty("user.home")));
 		fileChooserOpen.getExtensionFilters().addAll(
 							new FileChooser.ExtensionFilter("All Files", "*.*"),
 							new FileChooser.ExtensionFilter("Properties", "*.properties"));
+
+		//FileChooser for Save
+		fileChooserSave = new FileChooser();
+		fileChooserSave.setTitle("Speicherort Auswaehlen");
+		fileChooserSave.setInitialDirectory(new File(System.getProperty("user.home")));
+		fileChooserSave.initialFileNameProperty().set("save.properties");
+
+		//FileChooser for Export
+		fileChooserExport = new FileChooser();
+		fileChooserExport.setTitle("Speicherort Auswaehlen");
+		fileChooserExport.setInitialDirectory(new File(System.getProperty("user.home")));
+		fileChooserExport.initialFileNameProperty().set("image.png");
+		fileChooserExport.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("PNG", "*.png"),
+				new FileChooser.ExtensionFilter("JPG", "*.jpg, *.jpeg"));
 		textArea = new TextArea();
 		textArea.setMinHeight(70);
-
-		//DirectoryChooser
-		FileChooserSave = new FileChooser();
-		FileChooserSave.setTitle("Speicherort Auswaehlen");
-		FileChooserSave.setInitialDirectory(new File(System.getProperty("user.home")));
-		FileChooserSave.initialFileNameProperty().set("save.properties");
-
 		
 		amountPlatesHit = 0;
 		platesFrom = null;
@@ -263,7 +280,7 @@ public class Gui extends Application {
 		// Physical Shape parameter of the Tower
 		final double towerWidth = 20;
 		// Also begin on y-axis
-		final double towerHeight = WindowHeight / SCALING_FACTOR_Y;
+		final double towerHeight = windowHeight / SCALING_FACTOR_Y;
 
 		double plateWidth = Plate.getMaxWidth();
 		double plateHeight = Plate.getHeight();
@@ -342,6 +359,13 @@ public class Gui extends Application {
 	}
 	private File getSaveDirectory() {
 		return this.saveDirectory;
+	}
+	
+	private void setExportDirectory(File file) {
+		this.exportDirectory = file;
+	}
+	private File getExportDirectory() {
+		return this.exportDirectory;
 	}
 //----------------------------------------------------//
 
@@ -562,7 +586,7 @@ public class Gui extends Application {
 
 		// Main Elements
 		GridPane root = new GridPane();
-		Canvas showCase = new Canvas(WindowWidth, WindowHeight);
+		Canvas showCase = new Canvas(windowWidth, windowHeight);
 		GraphicsContext gc = showCase.getGraphicsContext2D();
 
 		root.add(menu, 0, 0);
@@ -629,7 +653,9 @@ public class Gui extends Application {
 							app = new App(amountTowers, newBitWidth);
 							setInitObjects(app);
 							newWindow.close();
-
+							sameSave = false;
+							sameExport = false;
+							
 							// Input is not a Integer
 						} catch (NumberFormatException exception) {
 
@@ -655,13 +681,14 @@ public class Gui extends Application {
 		saveAs.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
+				boolean saved = false;
 				textArea.clear();
-				setSaveDirectory(FileChooserSave.showSaveDialog(primaryStage));
+				setSaveDirectory(fileChooserSave.showSaveDialog(primaryStage));
 				File dir = getSaveDirectory();
 				if(dir != null) {
 					textArea.setText(dir.getAbsolutePath());
-					MenuFile.save(app.getAmountTowers(), 
-							app.getTowerHeight(), dir.getAbsolutePath());
+					saved = MenuFile.save(app.getAmountTowers(), 
+						app.getTowerHeight(), dir.getAbsolutePath());						
 				}
 			}
 		});
@@ -669,19 +696,19 @@ public class Gui extends Application {
 		save.setOnAction(new EventHandler<ActionEvent>() {
 			@Override 
 			public void handle(ActionEvent e) {
-//				MenuFile file = new MenuFile();
 				textArea.clear();
 				File dir = null;
-				if(sameSession) {
+				boolean saved = false;
+				if(sameSave) {
 					dir = getSaveDirectory();
 				}else {
-					setSaveDirectory(FileChooserSave.showSaveDialog(primaryStage));
+					setSaveDirectory(fileChooserSave.showSaveDialog(primaryStage));
 					dir = getSaveDirectory();
-					sameSession = true;
+					sameSave = true;
 				}
 				if(dir != null) {
 					textArea.setText(dir.getAbsolutePath());
-					MenuFile.save(app.getAmountTowers(), app.getTowerHeight(),
+					saved = MenuFile.save(app.getAmountTowers(), app.getTowerHeight(),
 							dir.getAbsolutePath());
 				}else {
 					textArea.setText(null);
@@ -693,18 +720,46 @@ public class Gui extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				textArea.clear();
-				List<File> files = new ArrayList<>();
 				File file = fileChooserOpen.showOpenDialog(primaryStage);
 				if(file != null) {
-//					files = Arrays.asList(file);
 					try {
 						app = MenuFile.open(file, app);	
 					}catch (NullPointerException npe) {
 						npe.printStackTrace();
 					}
-					sameSession = false;
+					sameSave = false;
+					sameExport = false;
 					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 					setInitObjects(app);
+				}
+			}
+		});
+		
+		export.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent e) {
+				File file = null;
+				boolean exported = false;
+				if(sameExport) {
+					file = getExportDirectory();
+				}else {
+					setExportDirectory(fileChooserExport.showSaveDialog(primaryStage));
+					file = getExportDirectory();
+					sameExport = true;
+				}
+				if(file != null) {
+					exported = MenuFile.export(file, showCase);
+				}
+			}
+		});
+		
+		exportAs.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				File file = fileChooserExport.showSaveDialog(primaryStage);
+				boolean exported = false;
+				if(file != null) {
+					exported = MenuFile.export(file,showCase);
 				}
 			}
 		});
@@ -801,7 +856,7 @@ public class Gui extends Application {
 		}.start();
 
 		primaryStage.setTitle("Tuerme von Hanoi");
-		primaryStage.setScene(new Scene(root, WindowWidth, WindowHeight));
+		primaryStage.setScene(new Scene(root, windowWidth, windowHeight));
 		primaryStage.show();
 	}
 }
