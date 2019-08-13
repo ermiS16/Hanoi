@@ -59,6 +59,7 @@ public class Gui extends Application {
 	private Rectangle2D screenBounds;
 	private double WindowWidth;
 	private double WindowHeight;
+	private boolean sameSession;
 
 	// Mouse Context Menu
 	private ContextMenu mouseContextMenu;
@@ -113,6 +114,7 @@ public class Gui extends Application {
 	private Tower platesFrom;
 	private List<Plate> platesToMove;
 	private final double SCALING_FACTOR_Y = 3;
+	private File saveDirectory;
 
 	/**
 	 * Initialization of GUI Elements.
@@ -124,7 +126,8 @@ public class Gui extends Application {
 		screenBounds = Screen.getPrimary().getVisualBounds();
 		WindowWidth = screenBounds.getWidth() * REL_WINDOW_SIZE_FACTOR;
 		WindowHeight = screenBounds.getHeight() * REL_WINDOW_SIZE_FACTOR;
-
+		sameSession = false;
+		
 //		//For New Entry
 		newEntryWindow = new GridPane();
 		varAmountTowers = new TextField();
@@ -239,6 +242,8 @@ public class Gui extends Application {
 		FileChooserSave = new FileChooser();
 		FileChooserSave.setTitle("Speicherort Auswaehlen");
 		FileChooserSave.setInitialDirectory(new File(System.getProperty("user.home")));
+		FileChooserSave.initialFileNameProperty().set("save.properties");
+
 		
 		amountPlatesHit = 0;
 		platesFrom = null;
@@ -275,10 +280,6 @@ public class Gui extends Application {
 		}
 	}
 	
-	public void restoreData(App app) {
-		this.app = app;
-	}
-
 	/**
 	 * Creates an Application with standard values for the Towers.
 	 * 
@@ -334,6 +335,13 @@ public class Gui extends Application {
 
 	private Tower getPlatesFrom() {
 		return this.platesFrom;
+	}
+	
+	private void setSaveDirectory(File file) {
+		this.saveDirectory = file;
+	}
+	private File getSaveDirectory() {
+		return this.saveDirectory;
 	}
 //----------------------------------------------------//
 
@@ -644,17 +652,37 @@ public class Gui extends Application {
 			}
 		});
 		
+		saveAs.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				textArea.clear();
+				setSaveDirectory(FileChooserSave.showSaveDialog(primaryStage));
+				File dir = getSaveDirectory();
+				if(dir != null) {
+					textArea.setText(dir.getAbsolutePath());
+					MenuFile.save(app.getAmountTowers(), 
+							app.getTowerHeight(), dir.getAbsolutePath());
+				}
+			}
+		});
+		
 		save.setOnAction(new EventHandler<ActionEvent>() {
 			@Override 
 			public void handle(ActionEvent e) {
 //				MenuFile file = new MenuFile();
 				textArea.clear();
-				FileChooserSave.initialFileNameProperty().set("save.properties");
-				File dir = FileChooserSave.showSaveDialog(primaryStage);
+				File dir = null;
+				if(sameSession) {
+					dir = getSaveDirectory();
+				}else {
+					setSaveDirectory(FileChooserSave.showSaveDialog(primaryStage));
+					dir = getSaveDirectory();
+					sameSession = true;
+				}
 				if(dir != null) {
 					textArea.setText(dir.getAbsolutePath());
 					MenuFile.save(app.getAmountTowers(), app.getTowerHeight(),
-							app.getTowerSet(), dir.getAbsolutePath());
+							dir.getAbsolutePath());
 				}else {
 					textArea.setText(null);
 				}
@@ -669,15 +697,14 @@ public class Gui extends Application {
 				File file = fileChooserOpen.showOpenDialog(primaryStage);
 				if(file != null) {
 //					files = Arrays.asList(file);
-					MenuFile menuFile = new MenuFile();
 					try {
 						app = MenuFile.open(file, app);	
 					}catch (NullPointerException npe) {
 						npe.printStackTrace();
 					}
+					sameSession = false;
 					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 					setInitObjects(app);
-					
 				}
 			}
 		});

@@ -16,15 +16,12 @@ public class MenuFile {
 	
 	private static String TOWER_AMOUNT_KEY = "towerAmount";
 	private static String BITLENGTH_KEY = "bitlength";
-	private static String TOWERSET_KEY = "towerSet";
 	
-	public static boolean save(int amountTower, int bitlength,
-			TowerSet towerSet, String path) {
+	public static boolean save(int amountTower, int bitlength, String path) {
 		
 		Properties props = new Properties();
 		props.setProperty(TOWER_AMOUNT_KEY, ""+amountTower);
 		props.setProperty(BITLENGTH_KEY, ""+bitlength);
-		props.setProperty(TOWERSET_KEY, ""+towerSet.toString());
 		try {
 //			String path = getCurrentJarPath()+"props.properties";
 			props.store(new FileOutputStream(path), "Tower props");
@@ -66,14 +63,12 @@ public class MenuFile {
 		
 		int amountTower = application.getAmountTowers();
 		int bitlength = application.getTowerHeight();
-//		TowerSet towerSet = application.getTowerSet();
 		
 		try {
 			props.load(new FileInputStream(path));
 			try {
 				amountTower = Integer.parseInt((String) props.get(TOWER_AMOUNT_KEY));
 				bitlength = Integer.parseInt((String) props.get(BITLENGTH_KEY));					
-//				towerSet = (TowerSet) props.get(TOWERSET_KEY);
 			}catch(IllegalFormatException e) {
 				e.printStackTrace();
 			}	
@@ -85,29 +80,5 @@ public class MenuFile {
 		return new App(amountTower, bitlength);
 				
 	}	
-	
-	public App open(App application) {
-		Properties props = new Properties();
-		String path = getCurrentJarPath()+"props.properties";
-		int amountTower = application.getAmountTowers();
-		int bitlength = application.getTowerHeight();
-		TowerSet towerSet = application.getTowerSet();
-		try {
-			props.load(new FileInputStream(path));
-			try {
-				amountTower = (int) props.get(TOWER_AMOUNT_KEY);
-				bitlength = (int) props.get(BITLENGTH_KEY);
-				towerSet = (TowerSet) props.get(TOWERSET_KEY);
-			}catch(IllegalFormatException e) {
-				e.printStackTrace();
-			}
-		
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return new App(amountTower, bitlength, towerSet);
-	}
 	
 }
