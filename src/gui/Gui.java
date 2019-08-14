@@ -297,6 +297,12 @@ public class Gui extends Application {
 		}
 	}
 	
+	public App restoreDate(App application) {
+		
+		
+		return this.app;
+	}
+	
 	/**
 	 * Creates an Application with standard values for the Towers.
 	 * 
@@ -687,7 +693,7 @@ public class Gui extends Application {
 				File dir = getSaveDirectory();
 				if(dir != null) {
 					textArea.setText(dir.getAbsolutePath());
-					saved = MenuFile.save(app.getAmountTowers(), 
+					saved = MenuFile.save(app.getTowerSet(), app.getAmountTowers(), 
 						app.getTowerHeight(), dir.getAbsolutePath());						
 				}
 			}
@@ -708,8 +714,8 @@ public class Gui extends Application {
 				}
 				if(dir != null) {
 					textArea.setText(dir.getAbsolutePath());
-					saved = MenuFile.save(app.getAmountTowers(), app.getTowerHeight(),
-							dir.getAbsolutePath());
+					saved = MenuFile.save(app.getTowerSet(),app.getAmountTowers(),
+							app.getTowerHeight(), dir.getAbsolutePath());
 				}else {
 					textArea.setText(null);
 				}

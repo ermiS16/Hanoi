@@ -84,4 +84,9 @@ public class Plate implements Comparable<Object>{
 		}
 		return compare;
 	}
+	
+	@Override
+	public String toString() {
+		return "Value: "+this.getValue();
+	}
 }

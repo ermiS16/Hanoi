@@ -33,6 +33,7 @@ public class Tower {
 	private int logicalHeight;
 	private List<Plate> platesOnThisTower;
 	
+	private int id;
 	private Hitbox hitbox;
 	private Position pos;
 	private double physicalHeight;
@@ -49,13 +50,14 @@ public class Tower {
 	 * numberSystem - 1 plates per width and height different widths, for a total of (numberSystem - 1) * height
 	 * plates.
 	 */
-	public Tower(int height, boolean initWithPlates) {
+	public Tower(int height, boolean initWithPlates, int id) {
 		this.logicalHeight = height;
 		this.platesOnThisTower = new ArrayList<Plate>();
 		this.hitbox = new Hitbox();
 		this.pos = new Position();
 		this.physicalHeight = 0;
 		this.physicalWidth = 0;
+		this.id = id;
 		
 		//if initWithPlates is true, create plates for this tower
 		if (initWithPlates) {
@@ -271,5 +273,12 @@ public class Tower {
 		
 		//save representation (and remove leading zeros)
 		this.representation = representationBuilder.reverse().toString().replaceFirst("^0+", "");
+	}
+	@Override public String toString() {
+		String tower = "Tower: "+this.id;
+		String plates = ", Plates: "  + this.getPlates().size();
+		String height = ", Height: " + this.getLogicalHeight();
+
+		return tower+plates+height;
 	}
 }

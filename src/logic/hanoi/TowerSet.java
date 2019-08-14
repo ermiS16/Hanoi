@@ -38,8 +38,12 @@ public class TowerSet {
 		this.towers = new Tower[towerAmount];
 		
 		for (int i = 0; i < towers.length; i++) {
-			this.towers[i] = new Tower(towerLogicalHeight, i == 0);
+			this.towers[i] = new Tower(towerLogicalHeight, i == 0, i+1);
 		}
+	}
+	
+	public TowerSet(Tower[] towers) {
+		this.towers = towers;
 	}
 	
 	public static int getDefaultHeight() {
