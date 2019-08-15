@@ -60,7 +60,7 @@ public class Gui extends Application {
 	private MenuItem info;
 	private MenuItem help;
 	private MenuItem reset;
-	private MenuItem newEntry;
+	private MenuItem newSession;
 	private MenuItem save;
 	private MenuItem saveAs;
 	private MenuItem export;
@@ -90,8 +90,8 @@ public class Gui extends Application {
 	private Separator separator1;
 	private Separator separator2;
 	private Separator separator3;
-	private Button newEntryOk;
-	private Button newEntryCancel;
+	private Button newSessionOk;
+	private Button newSessionCancel;
 	private TextField varAmountTowers;
 	private Label labelAmountTowers;
 	private Label labelBitWidth;
@@ -156,8 +156,8 @@ public class Gui extends Application {
 		labelBitWidth = new Label("Bitbreite: ");
 		labelNumber = new Label("Groeßte Zahl: ");
 
-		newEntryOk = new Button("OK");
-		newEntryCancel = new Button("Cancel");
+		newSessionOk = new Button("OK");
+		newSessionCancel = new Button("Cancel");
 		separator0 = new Separator();
 		separator0.setMinHeight(10);
 		separator0.visibleProperty().setValue(false);
@@ -188,8 +188,8 @@ public class Gui extends Application {
 		separator3.setMinHeight(30);
 		separator3.visibleProperty().setValue(false);
 		newEntryWindow.add(separator3, 0, 6);
-		newEntryWindow.add(newEntryOk, 0, 7);
-		newEntryWindow.add(newEntryCancel, 1, 7);
+		newEntryWindow.add(newSessionOk, 0, 7);
+		newEntryWindow.add(newSessionCancel, 1, 7);
 
 		// Mouse Context Menu
 		mouseContextMenu = new ContextMenu();
@@ -198,7 +198,7 @@ public class Gui extends Application {
 		quit = new MenuItem("exit");
 		info = new MenuItem("info");
 		reset = new MenuItem("reset");
-		newEntry = new MenuItem("new");
+		newSession = new MenuItem("new");
 		save = new MenuItem("save");
 		saveAs = new MenuItem("save as...");
 		export = new MenuItem("export");
@@ -210,12 +210,12 @@ public class Gui extends Application {
 		info = new MenuItem("info");
 		help = new MenuItem("help");
 
-		mouseContextMenu.getItems().addAll(newEntry, reset);
+		mouseContextMenu.getItems().addAll(newSession, reset);
 
 		// Menu
 		menu = new MenuBar();
 		file = new Menu("File");
-		file.getItems().addAll(newEntry, open, save, saveAs, export, exportAs, quit);
+		file.getItems().addAll(newSession, open, save, saveAs, export, exportAs, quit);
 		settings = new Menu("Settings");
 		settings.getItems().addAll(reset, showParameters);
 		about = new Menu("About Us");
@@ -283,8 +283,6 @@ public class Gui extends Application {
 	}
 	
 	public App restoreDate(App application) {
-		
-		
 		return this.app;
 	}
 	
@@ -294,9 +292,7 @@ public class Gui extends Application {
 	 * @return the current Application
 	 */
 	private App createScene() {
-//		App application = new App();
 		return new App();
-//		return application;
 	}
 
 //-------------------Helper Methods--------------//
@@ -462,11 +458,19 @@ public class Gui extends Application {
 		}
 	}
 
+	/**
+	 * Move Plates from one Tower to another one
+	 * Return true if it was successful, false if not.
+	 * 
+	 * @param from The Tower from where Plated must to be moved
+	 * @param to The Tower where Plates must be moved
+	 * @param plateMoveList List of Plates that shall be moved
+	 * @return true if plates are moved successful, false otherwise
+	 */
 	private boolean movePlates(Tower from, Tower to, List<Plate> plateMoveList) {
 		boolean moved = false;
 		int platesAmount = platesToMove.size();
 		if (to == from) {
-			System.out.println("same");
 			return false;
 		}
 
@@ -475,12 +479,14 @@ public class Gui extends Application {
 		// if the smallest plate on the receiving tower is smaller than this lsba, this
 		// can't be done
 		if (lsba > to.getLSBAValue()) {
-			System.out.println("bigger on other");
 			return false;
 		}
 
 		List<Plate> moveList = new ArrayList<>();
+		//Checks if List of Plates are Movable as a whole
 		if (movable(from, getPlateToMove())) {
+			
+			//Every Plates is removed from the tower that owns them
 			for (Plate p : getPlateToMove()) {
 				from.removeOfValue(platesAmount, from.getLSBAValue(), false);
 				p.getHitbox().setHit(false);
@@ -493,14 +499,13 @@ public class Gui extends Application {
 			// Remove all Plates that has moved
 			removePlateToMoveAll(getPlateToMove());
 
-			//
+			//Recalculate both towers
 			from.recalculate();
 			to.recalculate();
 
 			moved = true;
-
+		
 		} else {
-			removePlateToMoveAll(getPlateToMove());
 			moved = false;
 		}
 		return moved;
@@ -608,7 +613,7 @@ public class Gui extends Application {
 			}
 		});
 
-		// Reset the towerSet as to begin of the session.
+		// Reset the towerSet as it was to begin of the session.
 		reset.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -618,14 +623,15 @@ public class Gui extends Application {
 			}
 		});
 
+		//New Session Section
 		Stage newWindow = new Stage();
 		newWindow.setScene(new Scene(newEntryWindow, 350, 250));
-		newEntry.setOnAction(new EventHandler<ActionEvent>() {
+		newSession.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
 				newWindow.show();
 
-				newEntryOk.setOnAction(new EventHandler<ActionEvent>() {
+				newSessionOk.setOnAction(new EventHandler<ActionEvent>() {
 					@Override 
 					public void handle(ActionEvent e) {
 						gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
@@ -660,7 +666,7 @@ public class Gui extends Application {
 					}
 				});
 
-				newEntryCancel.setOnAction(new EventHandler<ActionEvent>() {
+				newSessionCancel.setOnAction(new EventHandler<ActionEvent>() {
 					@Override 
 					public void handle(ActionEvent ev) {
 						newWindow.close();
@@ -669,40 +675,47 @@ public class Gui extends Application {
 			}
 		});
 		
+		//Save a Session
 		saveAs.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
 				boolean saved = false;
-				textArea.clear();
+				
+				//Set the Path for the savefile
 				setSaveDirectory(fileChooserSave.showSaveDialog(primaryStage));
 				File dir = getSaveDirectory();
+				
+				//Only if Directory exist
 				if(dir != null) {
-					textArea.setText(dir.getAbsolutePath());
+					//Saving the current Session with it's parameters
 					saved = MenuFile.save(app.getTowerSet(), app.getAmountTowers(), 
 						app.getTowerHeight(), dir.getAbsolutePath());						
 				}
 			}
 		});
 		
+		//Nearly Same as saveAs, only to handle what will happen when first clicked
 		save.setOnAction(new EventHandler<ActionEvent>() {
 			@Override 
 			public void handle(ActionEvent e) {
-				textArea.clear();
 				File dir = null;
 				boolean saved = false;
+				
+				//If it's the same session, the SaveDirectory is already known
 				if(sameSave) {
 					dir = getSaveDirectory();
+				//If it's the a "first" session, than the User has to determine a location
 				}else {
 					setSaveDirectory(fileChooserSave.showSaveDialog(primaryStage));
 					dir = getSaveDirectory();
 					sameSave = true;
 				}
+				
+				//Only if Directory exist
 				if(dir != null) {
-					textArea.setText(dir.getAbsolutePath());
+					//Saving the current Session with it's parameters
 					saved = MenuFile.save(app.getTowerSet(),app.getAmountTowers(),
 							app.getTowerHeight(), dir.getAbsolutePath());
-				}else {
-					textArea.setText(null);
 				}
 			}
 		});
@@ -710,7 +723,6 @@ public class Gui extends Application {
 		open.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				textArea.clear();
 				File file = fileChooserOpen.showOpenDialog(primaryStage);
 				if(file != null) {
 					try {

@@ -204,10 +204,13 @@ public class Tower {
 	}
 	
 	/**
-	 * Method needed for plate moving.
+	 * Removes a Value from the Tower
+	 * 
+	 * @param amount of Plates, that has to be removed
+	 * @param value the LSBA Value of the Tower, the Plates are removed from
+	 * @param retainGhost -> Need to be removed
 	 */
 	public void removeOfValue(int amount, int value, boolean retainGhost) {
-		System.out.println("ghost? " + retainGhost);
 		List<Plate> platesToRemove = new ArrayList<Plate>();
 		
 		Iterator<Plate> plateIterator = platesOnThisTower.iterator();
@@ -274,6 +277,7 @@ public class Tower {
 		//save representation (and remove leading zeros)
 		this.representation = representationBuilder.reverse().toString().replaceFirst("^0+", "");
 	}
+	
 	@Override public String toString() {
 		String tower = "Tower: "+this.id;
 		String plates = ", Plates: "  + this.getPlates().size();
