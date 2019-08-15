@@ -1,8 +1,5 @@
 package main;
 
-import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
-import com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.SecretKeyResolver;
-
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.CodeSource;
 import java.util.IllegalFormatException;
-import java.util.List;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
@@ -72,21 +68,21 @@ public class MenuFile {
 		}
 	}
 	
-	private String getCurrentJarPath() {
-		String path = getJarPath();
-		if(path.endsWith(".jar")) {
-			return path.substring(0, path.lastIndexOf("/"));
-		}
-		return path;
-	}
-	
-	private String getJarPath() {
-		final CodeSource source = this.getClass().getProtectionDomain().getCodeSource();
-		if(source != null) {
-			return source.getLocation().getPath().replaceAll("%20", " ");
-		}
-		return null;
-	}
+//	private String getCurrentJarPath() {
+//		String path = getJarPath();
+//		if(path.endsWith(".jar")) {
+//			return path.substring(0, path.lastIndexOf("/"));
+//		}
+//		return path;
+//	}
+//	
+//	private String getJarPath() {
+//		final CodeSource source = this.getClass().getProtectionDomain().getCodeSource();
+//		if(source != null) {
+//			return source.getLocation().getPath().replaceAll("%20", " ");
+//		}
+//		return null;
+//	}
 	
 	public static App open(File file, App application) {
 		Properties props = new Properties();
@@ -96,7 +92,7 @@ public class MenuFile {
 		int amountTower = application.getAmountTowers();
 		int bitlength = application.getTowerHeight();
 		TowerSet towerSet = application.getTowerSet();
-		Tower[] towers = new Tower[amountTower];
+		
 		
 		double plateWidth = 0;
 		double plateHeight = 0;
@@ -111,7 +107,7 @@ public class MenuFile {
 			try {
 				amountTower = Integer.parseInt((String) props.get(TOWER_AMOUNT_KEY));
 				bitlength = Integer.parseInt((String) props.get(BITLENGTH_KEY));
-				
+				Tower[] towers = new Tower[amountTower];
 				int keyOffset = 1;
 				for(int i=0; i<amountTower; i++) {
 					ap = props.getProperty((String) AMOUNT_PLATES_ON_TOWER+keyOffset);

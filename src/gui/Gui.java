@@ -6,31 +6,17 @@ import logic.hanoi.Plate;
 import logic.hanoi.PlateComperator;
 import logic.hanoi.Tower;
 import logic.hanoi.TowerSet;
-
-import java.awt.Desktop;
-import java.awt.image.RenderedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
-
-import javax.imageio.ImageIO;
-
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.geometry.Rectangle2D;
@@ -41,7 +27,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.control.MenuBar;
@@ -242,23 +227,23 @@ public class Gui extends Application {
 		fileChooserOpen.setTitle("Datei Auswaehlen");
 		fileChooserOpen.setInitialDirectory(new File(System.getProperty("user.home")));
 		fileChooserOpen.getExtensionFilters().addAll(
-							new FileChooser.ExtensionFilter("All Files", "*.*"),
-							new FileChooser.ExtensionFilter("Properties", "*.properties"));
+							new FileChooser.ExtensionFilter("All Files (\"*.*\")", "*.*"),
+							new FileChooser.ExtensionFilter("Properties (\"*.properties\")", "*.properties"));
 
 		//FileChooser for Save
 		fileChooserSave = new FileChooser();
 		fileChooserSave.setTitle("Speicherort Auswaehlen");
 		fileChooserSave.setInitialDirectory(new File(System.getProperty("user.home")));
 		fileChooserSave.initialFileNameProperty().set("save.properties");
+		fileChooserSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("Properties (\"*.properties\")", "*.properties"));
 
 		//FileChooser for Export
 		fileChooserExport = new FileChooser();
 		fileChooserExport.setTitle("Speicherort Auswaehlen");
 		fileChooserExport.setInitialDirectory(new File(System.getProperty("user.home")));
 		fileChooserExport.initialFileNameProperty().set("image.png");
-		fileChooserExport.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("PNG", "*.png"),
-				new FileChooser.ExtensionFilter("JPG", "*.jpg, *.jpeg"));
+		fileChooserExport.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
+		
 		textArea = new TextArea();
 		textArea.setMinHeight(70);
 		
