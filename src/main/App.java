@@ -4,6 +4,13 @@ import logic.hanoi.*;
 import gui.Gui;
 import javafx.application.*;
 
+/**
+ * Main Class of the Project. Represents an Application.
+ * @author Eric
+ * @verion 1.0
+ *
+ */
+
 public class App{
 	
 	private TowerSet towerSet;

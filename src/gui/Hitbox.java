@@ -2,6 +2,12 @@ package gui;
 
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Represents a normal, rectangle shaped, hitbox.
+ * @author Eric
+ * @version 1.0
+ */
+
 public class Hitbox {
 	
 	private Rectangle hitbox;

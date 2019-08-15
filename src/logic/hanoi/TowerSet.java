@@ -6,6 +6,7 @@ package logic.hanoi;
  * @author Jonathan, Eric
  * @version 1.0
  */
+
 public class TowerSet {
 	//saves the towers of this tower set in order
 	private Tower[] towers;

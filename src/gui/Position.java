@@ -2,6 +2,12 @@ package gui;
 
 import javafx.geometry.Point2D;
 
+/**
+ * Represents a Position as a Point on a 2D coordination system
+ * @author Eric
+ * @version 1.0
+ */
+
 public class Position {
 	private Point2D pos;
 	

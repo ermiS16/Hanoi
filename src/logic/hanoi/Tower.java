@@ -13,9 +13,10 @@ import java.util.List;
 /**
  * Represents one tower that can hold mulltiple plates.
  * 
- * @author Jonathan
+ * @author Jonathan, Eric
  * @version 1.0
  */
+
 public class Tower {
 	private static final String EMPTY_REPRESENTATIVE = "0";
 	private static final int BINARAY_SYSTEM = 2;

@@ -40,6 +40,12 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ContextMenuEvent;
 
+/**
+ * The GUI of the Application
+ * @author Eric
+ * @version 1.0
+ */
+
 public class Gui extends Application {
 
 	// Fix Attributes
@@ -666,6 +672,7 @@ public class Gui extends Application {
 					}
 				});
 
+				//new Parameters are not taken over, and newSession Window is closed.
 				newSessionCancel.setOnAction(new EventHandler<ActionEvent>() {
 					@Override 
 					public void handle(ActionEvent ev) {
@@ -720,6 +727,8 @@ public class Gui extends Application {
 			}
 		});
 		
+		
+		//Handles the Open of a Save
 		open.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -738,6 +747,7 @@ public class Gui extends Application {
 			}
 		});
 		
+		//Handle the Export as an Image. Mostly same as exportAs. but handles what happen, when first clicked.
 		export.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent e) {
@@ -756,6 +766,7 @@ public class Gui extends Application {
 			}
 		});
 		
+		//Handle the Export of the canvas as an Image.
 		exportAs.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -767,15 +778,21 @@ public class Gui extends Application {
 			}
 		});
 		
+		//Handles the Mouseclicks on Plates an Towers.
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				boolean moved = false;
 				Tower from = null;
 				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 				gc.setFill(Color.BLACK);
+				
+				//A small Oval for showing, where the user clicked on the canvas.
 				gc.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
 				for (Tower t : towerSet) {
 					if (!t.getPlates().isEmpty()) {
+						
+						//Plates can only be "clicked" if their are on a Tower, where another one is already clicked or
+						//no Tower is selected at that moment.
 						if (t == getPlatesFrom() || getPlatesFrom() == null) {
 							for (Plate p : t.getPlates()) {
 								// Checks if Hitbox of a Plate is hit
@@ -799,24 +816,36 @@ public class Gui extends Application {
 							} // for
 						} // if
 					} // if
+					
+					//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
+					//Plates are selected.
 					if (hitMatch(t.getHitbox(), e.getX(), e.getY())) {
 						if (!t.getHitbox().isHit() && getAmountPlatesHit() != 0) {
 							t.getHitbox().setHit(true);
 							from = getPlatesFrom();
+							
+							//Plates are moved from a Tower to another (t)
 							try {
 								moved = movePlates(from, t, getPlateToMove());
 								if (moved) {
+									
+									//Reset the hitbox of the both involved towers
+									//and reset the Plates that must be moved to zero.
 									resetAmountPlatesHit();
 									t.getHitbox().setHit(false);
 									from.getHitbox().setHit(false);
 									resetPlatesFrom();
 								} else {
+									
+									//When the Plates are not moved, then t is no longer a available destination.
 									t.getHitbox().setHit(false);
 								}
 							} catch (NullPointerException exception) {
 								exception.printStackTrace();
 							}
 						} else
+							//Tower is not a destination, when no plates are selected, or the tower is already hit,
+							//because it would be the source of plates then.
 							t.getHitbox().setHit(false);
 					}
 				}
@@ -829,6 +858,7 @@ public class Gui extends Application {
 			}
 		});
 
+		//Quit and ends the Session
 		quit.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -837,6 +867,7 @@ public class Gui extends Application {
 			}
 		});
 
+		//Info about the Program, the authors and the version.
 		info.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -851,6 +882,7 @@ public class Gui extends Application {
 			}
 		});
 
+		//A Timer, that creates an "endles" loop
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
@@ -858,6 +890,7 @@ public class Gui extends Application {
 			}
 		}.start();
 
+		//Set up the Main Window.
 		primaryStage.setTitle("Tuerme von Hanoi");
 		primaryStage.setScene(new Scene(root, windowWidth, windowHeight));
 		primaryStage.show();

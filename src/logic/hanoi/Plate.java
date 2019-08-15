@@ -5,9 +5,10 @@ import gui.Hitbox;
 /**
  * Represents a single plate that can be on a tower.
  * 
- * @author Jonathan
+ * @author Jonathan, Eric
  * @version 1.0
  */
+
 public class Plate implements Comparable<Object>{
 	
 	private static final double MAXWIDTH = 150;

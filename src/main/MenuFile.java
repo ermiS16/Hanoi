@@ -16,6 +16,11 @@ import logic.hanoi.Plate;
 import logic.hanoi.Tower;
 import logic.hanoi.TowerSet;
 
+/**
+ * This Class handles file operation, such as save, open and export
+ * @author Eric
+ * @version 1.0
+ */
 
 public class MenuFile {
 	
