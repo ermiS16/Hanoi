@@ -46,6 +46,7 @@ import javafx.scene.input.ContextMenuEvent;
  * @version 1.0
  */
 
+
 public class Gui extends Application {
 
 	// Fix Attributes
@@ -114,6 +115,7 @@ public class Gui extends Application {
 	private final double SCALING_FACTOR_Y = 3;
 	private File saveDirectory;
 	private File exportDirectory;
+	private boolean printValue;
 
 	/**
 	 * Initialization of GUI Elements.
@@ -127,6 +129,7 @@ public class Gui extends Application {
 		windowHeight = screenBounds.getHeight() * REL_WINDOW_SIZE_FACTOR;
 		sameSave = false;
 		sameExport = false;
+		printValue = true;
 		
 //		//For New Entry
 		newEntryWindow = new GridPane();
@@ -360,6 +363,14 @@ public class Gui extends Application {
 	private File getExportDirectory() {
 		return this.exportDirectory;
 	}
+	
+	private void setPrintValue(boolean print) {
+		this.printValue = print;
+	}
+	private boolean getPrintValue() {
+		return this.printValue;
+	}
+	
 //----------------------------------------------------//
 
 	/**
@@ -371,7 +382,9 @@ public class Gui extends Application {
 	public void drawTower(GraphicsContext gc, TowerSet towerSet) {
 
 		int setLength = towerSet.getTowerSetLength();
-
+		int representationTextIndex = 2;
+		int valueTextInde = 3;
+		
 		// Scalingfactor for x-axis.
 		final double scalingFactorX = setLength + 1;
 
@@ -410,10 +423,10 @@ public class Gui extends Application {
 			gc.strokeText("Tower " + towerIndex, newX - textCenterOffset, newY + t.getPhysicalHeight() + textGap);
 
 			// Represantation of Tower in Bits
-			gc.strokeText(t.getRepresentation(), newX - textCenterOffset, newY + t.getPhysicalHeight() + (textGap * 2));
+			gc.strokeText(t.getRepresentation(), newX - textCenterOffset, newY + t.getPhysicalHeight() + (textGap * representationTextIndex));
 
 			// Represantation of Tower as Value
-			gc.strokeText(t.getValue() + "", newX - textCenterOffset, newY + t.getPhysicalHeight() + (textGap * 3));
+			gc.strokeText(t.getValue() + "", newX - textCenterOffset, newY + t.getPhysicalHeight() + (textGap * valueTextInde));
 
 			drawPlates(gc, t);
 
@@ -433,7 +446,15 @@ public class Gui extends Application {
 	 */
 	public void drawPlates(GraphicsContext gc, Tower tower) {
 		List<Plate> plateList = tower.getPlates();
-
+		
+		double valueTextX = 0;
+		double valueTextY = 0;
+		int valueTextOffsetY = 10;
+		double hitBoxStartX = 0;
+		double hitboxEndX = 0;
+		double hitboxStartY = 0;
+		double hitboxEndY = 0;
+		
 		// Plates must exist
 		if (!plateList.isEmpty()) {
 
@@ -448,7 +469,7 @@ public class Gui extends Application {
 				if (p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
 				else gc.setFill(Color.RED);
 
-				// Set the Position on the X-Axis
+				// First, get the middle of the Tower on the X-Axis, then subtract the half of the physical width of the plate.
 				newX = tower.getPosition().getX() + (tower.getPhysicalWidth() / 2) - (p.getPhysicalWidth() / 2);
 
 				// Draw the Plate
@@ -456,8 +477,21 @@ public class Gui extends Application {
 				gc.fillRect(newX, newY, p.getPhysicalWidth(), p.getPhysicalHeight());
 
 				// Set the Hitbox for the Plate
-				p.getHitbox().setHitbox(newX, newX + p.getPhysicalWidth(), newY, newY - p.getPhysicalHeight());
+				hitBoxStartX = newX;
+				hitboxEndX =  newX + p.getPhysicalWidth();
+				hitboxStartY = newY;
+				hitboxEndY = newY - p.getPhysicalHeight();
+				p.getHitbox().setHitbox(hitBoxStartX, hitboxEndX, hitboxStartY, hitboxEndY);
 
+				//Print Value "on" Plate
+				if(printValue) {
+					gc.setLineWidth(0.5);
+					gc.setFill(Color.BLACK);
+					valueTextX = newX + (p.getPhysicalWidth()/2) ;
+					valueTextY = newY+valueTextOffsetY;
+					gc.strokeText(""+p.getValue(), valueTextX, valueTextY);
+				}
+				
 				// Setting the new Startposition
 				newY -= p.getPhysicalHeight() + plateGap;
 			}
@@ -558,7 +592,7 @@ public class Gui extends Application {
 		// Iterates from the Plate on the Top down, to check if following plates
 		// are Contained in the List of Plates, that has to move.
 		else {
-			for (int i = lsba, k = tower.getPlates().size() - 1; i < plateList.size(); i++, k--) {
+			for (int i = 0, k = tower.getPlates().size() - 1; i < plateList.size(); i++, k--) {
 				if (plateList.get(i) != tower.getPlates().get(k)) {
 					movable = false;
 				}
