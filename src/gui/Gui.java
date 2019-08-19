@@ -2,6 +2,8 @@ package gui;
 
 import main.App;
 import main.MenuFile;
+import logic.hanoi.DifficultyLevel;
+import logic.hanoi.GameModes;
 import logic.hanoi.Plate;
 import logic.hanoi.PlateComperator;
 import logic.hanoi.Tower;
@@ -73,20 +75,22 @@ public class Gui extends Application {
 	private MenuItem export;
 	private MenuItem exportAs;
 	private MenuItem open;
-	private MenuItem showParameters;
+	private MenuItem towerValue;
+	private MenuItem plateValue;
 	private MenuBar menu;
 	private Menu file;
 	private Menu settings;
 	private Menu about;
 
 	// New Entry Windowelements
-	private GridPane newEntryWindow;
+	private GridPane newSessionWindow;
 	
-	//FileChooser
+	//File relevated stuff
 	private FileChooser fileChooserOpen;
 	private FileChooser fileChooserSave;
 	private FileChooser fileChooserExport;
-	private TextArea textArea;
+	private File saveDirectory;
+	private File exportDirectory;
 
 	// User pick Elemets
 	private Slider bitWidth;
@@ -106,17 +110,32 @@ public class Gui extends Application {
 	private TextField varBitWidth;
 	private Label varNumber;
 
+	
+	//Tower relevated stuff
+	private static final double SCALING_FACTOR_TOWER_Y = 3;
+	private static final int MAX_AMOUNT_TOWERS = 6;
+	private static final int MIN_AMOUNT_TOWERS = 3;
+	private static final int MAX_BITWIDTH = 16;
+	private static final int MIN_BITWIDTH = 3;
+	private Tower[] towerSet;
+	private Tower platesFrom;
+	private boolean showTowerValue;
+	
+	//Plate relevated stuff
+	private int amountPlatesHit;
+	private boolean showPlateValue;
+	private List<Plate> platesToMove;
+	
 	// Necessary Stuff
 	private App app;
-	private Tower[] towerSet;
-	private int amountPlatesHit;
-	private Tower platesFrom;
-	private List<Plate> platesToMove;
-	private final double SCALING_FACTOR_Y = 3;
-	private File saveDirectory;
-	private File exportDirectory;
-	private boolean printValue;
 
+	//Gamemodestuff
+	private GameModes gameMode;
+	private DifficultyLevel difficulty;
+	private double gameTimer;
+	
+	
+	
 	/**
 	 * Initialization of GUI Elements.
 	 */
@@ -129,41 +148,42 @@ public class Gui extends Application {
 		windowHeight = screenBounds.getHeight() * REL_WINDOW_SIZE_FACTOR;
 		sameSave = false;
 		sameExport = false;
-		printValue = true;
+		showPlateValue = true;
+		showTowerValue = true;
 		
 //		//For New Entry
-		newEntryWindow = new GridPane();
+		newSessionWindow = new GridPane();
 		varAmountTowers = new TextField();
-		varAmountTowers.setPromptText("max: 6");
+		varAmountTowers.setPromptText("max: "+MAX_AMOUNT_TOWERS);
 		varBitWidth = new TextField();
-		varBitWidth.setPromptText("max: 8");
-		varNumber = new Label("7");
+		varBitWidth.setPromptText("max: "+MAX_BITWIDTH);
+		varNumber = new Label(""+calculateMaxNumber(MIN_BITWIDTH));
 
 		bitWidth = new Slider();
-		bitWidth.setMax(8);
-		bitWidth.setMin(3);
+		bitWidth.setMax(MAX_BITWIDTH);
+		bitWidth.setMin(MIN_BITWIDTH);
 		bitWidth.setShowTickMarks(true);
 		bitWidth.setShowTickLabels(true);
 		bitWidth.setMinorTickCount(1);
 		bitWidth.setMajorTickUnit(1);
-		bitWidth.setValue(3);
+		bitWidth.setValue(MIN_AMOUNT_TOWERS);
 		bitWidth.setBlockIncrement(1);
 		bitWidthValue = new Label("" + bitWidth.getMin());
 
 		amountTower = new Slider();
-		amountTower.setMax(6);
-		amountTower.setMin(3);
+		amountTower.setMax(MAX_AMOUNT_TOWERS);
+		amountTower.setMin(MIN_AMOUNT_TOWERS);
 		amountTower.setShowTickMarks(true);
 		amountTower.setShowTickLabels(true);
 		amountTower.setMinorTickCount(1);
 		amountTower.setMajorTickUnit(1);
-		amountTower.setValue(3);
+		amountTower.setValue(MIN_AMOUNT_TOWERS);
 		amountTower.setBlockIncrement(1);
 		amountTowerValue = new Label("" + amountTower.getMin());
 
 		labelAmountTowers = new Label("Anzahl Tuerme: ");
 		labelBitWidth = new Label("Bitbreite: ");
-		labelNumber = new Label("Groeßte Zahl: ");
+		labelNumber = new Label("Groesste Zahl: ");
 
 		newSessionOk = new Button("OK");
 		newSessionCancel = new Button("Cancel");
@@ -171,34 +191,34 @@ public class Gui extends Application {
 		separator0.setMinHeight(10);
 		separator0.visibleProperty().setValue(false);
 
-		newEntryWindow.add(separator0, 0, 0);
-		newEntryWindow.add(labelAmountTowers, 0, 1);
-		newEntryWindow.add(amountTower, 1, 1);
-		newEntryWindow.add(amountTowerValue, 2, 1);
+		newSessionWindow.add(separator0, 0, 0);
+		newSessionWindow.add(labelAmountTowers, 0, 1);
+		newSessionWindow.add(amountTower, 1, 1);
+		newSessionWindow.add(amountTowerValue, 2, 1);
 
 		separator1 = new Separator();
 		separator1.setMinHeight(20);
 		separator1.visibleProperty().setValue(false);
-		newEntryWindow.add(separator1, 0, 2);
+		newSessionWindow.add(separator1, 0, 2);
 
-		newEntryWindow.add(labelBitWidth, 0, 3);
-		newEntryWindow.add(bitWidth, 1, 3);
-		newEntryWindow.add(bitWidthValue, 2, 3);
+		newSessionWindow.add(labelBitWidth, 0, 3);
+		newSessionWindow.add(bitWidth, 1, 3);
+		newSessionWindow.add(bitWidthValue, 2, 3);
 
 		separator2 = new Separator();
 		separator2.setMinHeight(20);
 		separator2.visibleProperty().setValue(false);
-		newEntryWindow.add(separator2, 0, 4);
+		newSessionWindow.add(separator2, 0, 4);
 
-		newEntryWindow.add(labelNumber, 0, 5);
-		newEntryWindow.add(varNumber, 1, 5);
+		newSessionWindow.add(labelNumber, 0, 5);
+		newSessionWindow.add(varNumber, 1, 5);
 
 		separator3 = new Separator();
 		separator3.setMinHeight(30);
 		separator3.visibleProperty().setValue(false);
-		newEntryWindow.add(separator3, 0, 6);
-		newEntryWindow.add(newSessionOk, 0, 7);
-		newEntryWindow.add(newSessionCancel, 1, 7);
+		newSessionWindow.add(separator3, 0, 6);
+		newSessionWindow.add(newSessionOk, 0, 7);
+		newSessionWindow.add(newSessionCancel, 1, 7);
 
 		// Mouse Context Menu
 		mouseContextMenu = new ContextMenu();
@@ -213,7 +233,8 @@ public class Gui extends Application {
 		export = new MenuItem("export");
 		exportAs = new MenuItem("export as...");
 		open = new MenuItem("open");
-		showParameters = new MenuItem("Show Parameters");
+		towerValue = new MenuItem("Show Tower Value");
+		plateValue = new MenuItem("Show Bit Significance");
 		quit = new MenuItem("quit");
 		reset = new MenuItem("reset");
 		info = new MenuItem("info");
@@ -226,7 +247,7 @@ public class Gui extends Application {
 		file = new Menu("File");
 		file.getItems().addAll(newSession, open, save, saveAs, export, exportAs, quit);
 		settings = new Menu("Settings");
-		settings.getItems().addAll(reset, showParameters);
+		settings.getItems().addAll(reset, towerValue, plateValue);
 		about = new Menu("About Us");
 		about.getItems().addAll(info, help);
 		menu.getMenus().addAll(file, settings, about);
@@ -253,13 +274,15 @@ public class Gui extends Application {
 		fileChooserExport.initialFileNameProperty().set("image.png");
 		fileChooserExport.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
 		
-		textArea = new TextArea();
-		textArea.setMinHeight(70);
-		
 		amountPlatesHit = 0;
 		platesFrom = null;
 		platesToMove = new ArrayList<>();
 		app = createScene();
+		
+		gameMode = GameModes.FREE;
+		difficulty = DifficultyLevel.EASY;
+		gameTimer = 60;							//in seconds
+		
 		setInitObjects(app);
 	}
 
@@ -272,12 +295,14 @@ public class Gui extends Application {
 		this.towerSet = app.getTowerSet().getTowers();
 
 		// Physical Shape parameter of the Tower
-		final double towerWidth = 20;
+		final double towerWidth = Tower.getMinWidth();
 		// Also begin on y-axis
-		final double towerHeight = windowHeight / SCALING_FACTOR_Y;
-
+//		final double towerHeight = windowHeight / SCALING_FACTOR_TOWER_Y;
+		final double towerHeight = Tower.getMinHeight() * app.getTowerHeight();
+//		final double towerHeight = Tower.getMinHeight() * app.getTowerHeight();
+		
 		double plateWidth = Plate.getMaxWidth();
-		double plateHeight = Plate.getHeight();
+		double plateHeight = Plate.getMaxHeight();
 		double WidthMaxMinDiff = Plate.getMaxWidth() - Plate.getMinWidth();
 
 		// Calculates the right width for the Plate
@@ -364,139 +389,23 @@ public class Gui extends Application {
 		return this.exportDirectory;
 	}
 	
-	private void setPrintValue(boolean print) {
-		this.printValue = print;
+	private void setShowPlateValue(boolean show) {
+		this.showPlateValue = show;
 	}
-	private boolean getPrintValue() {
-		return this.printValue;
+	private boolean getShowPlateValue() {
+		return this.showPlateValue;
 	}
 	
+	private void setShowTowerValue(boolean show) {
+		this.showTowerValue = show;
+	}
+	private boolean getShowTowerValue() {
+		return this.showTowerValue;
+	}
+	
+	
+	
 //----------------------------------------------------//
-
-	/**
-	 * Draws all Towers from a TowerSet with its containing Plates
-	 * 
-	 * @param gc       GraphicContext of the Canvas on which the Towers are drawn.
-	 * @param towerSet Set of Towers, which will be drawn.
-	 */
-	public void drawTower(GraphicsContext gc, TowerSet towerSet) {
-
-		int setLength = towerSet.getTowerSetLength();
-		int representationTextIndex = 2;
-		int valueTextInde = 3;
-		
-		// Scalingfactor for x-axis.
-		final double scalingFactorX = setLength + 1;
-
-		// Distance between Towers
-		final double groundOffsetX = gc.getCanvas().getWidth() * Math.pow(scalingFactorX, -1);
-
-		// Gap between Tower and Text
-		double textGap = 30;
-
-		// To Center the Text
-		double textCenterOffset = towerSet.getTowers()[0].getPhysicalWidth() / 2;
-
-		// Start for the drawing of the Towers
-		double newY = towerSet.getTowers()[0].getPhysicalHeight();
-		double newX = groundOffsetX;
-
-		int towerIndex = 1;
-
-		// Draw all Towers
-		for (Tower t : this.towerSet) {
-			gc.setFill(Color.BROWN);
-
-			// Hitbox for ClickEvents
-			t.getHitbox().setHitbox(newX, newX + t.getPhysicalWidth(), newY, newY - t.getPhysicalHeight());
-
-			// Save Position for Tower
-			t.getPosition().setPosition(newX, newY);
-
-			// Draw new Tower
-			if (t.getHitbox().isHit()) gc.setFill(Color.YELLOW);
-			gc.setLineWidth(t.getPhysicalWidth());
-			gc.fillRect(newX, newY, t.getPhysicalWidth(), t.getPhysicalHeight());
-
-			// Name of Tower
-			gc.setLineWidth(0.1);
-			gc.strokeText("Tower " + towerIndex, newX - textCenterOffset, newY + t.getPhysicalHeight() + textGap);
-
-			// Represantation of Tower in Bits
-			gc.strokeText(t.getRepresentation(), newX - textCenterOffset, newY + t.getPhysicalHeight() + (textGap * representationTextIndex));
-
-			// Represantation of Tower as Value
-			gc.strokeText(t.getValue() + "", newX - textCenterOffset, newY + t.getPhysicalHeight() + (textGap * valueTextInde));
-
-			drawPlates(gc, t);
-
-			// New Position for the next Tower
-			newX += groundOffsetX;
-			newY = t.getPhysicalHeight();
-
-			towerIndex++;
-		}
-	}
-
-	/**
-	 * Draws the Plates from a specific Tower on the Canvas
-	 * 
-	 * @param gc    The GraphicContext of the Canvas
-	 * @param tower Tower wich Plates shall be Drawn
-	 */
-	public void drawPlates(GraphicsContext gc, Tower tower) {
-		List<Plate> plateList = tower.getPlates();
-		
-		double valueTextX = 0;
-		double valueTextY = 0;
-		int valueTextOffsetY = 10;
-		double hitBoxStartX = 0;
-		double hitboxEndX = 0;
-		double hitboxStartY = 0;
-		double hitboxEndY = 0;
-		
-		// Plates must exist
-		if (!plateList.isEmpty()) {
-
-			// Plate Attributes
-			double plateGap = 2;
-
-			// Initializing Startposition
-			double newX = 0;
-			double newY = tower.getPosition().getY() + tower.getPhysicalHeight();
-
-			for (Plate p : plateList) {
-				if (p.getHitbox().isHit()) gc.setFill(Color.YELLOW);
-				else gc.setFill(Color.RED);
-
-				// First, get the middle of the Tower on the X-Axis, then subtract the half of the physical width of the plate.
-				newX = tower.getPosition().getX() + (tower.getPhysicalWidth() / 2) - (p.getPhysicalWidth() / 2);
-
-				// Draw the Plate
-				gc.setLineWidth(p.getPhysicalHeight());
-				gc.fillRect(newX, newY, p.getPhysicalWidth(), p.getPhysicalHeight());
-
-				// Set the Hitbox for the Plate
-				hitBoxStartX = newX;
-				hitboxEndX =  newX + p.getPhysicalWidth();
-				hitboxStartY = newY;
-				hitboxEndY = newY - p.getPhysicalHeight();
-				p.getHitbox().setHitbox(hitBoxStartX, hitboxEndX, hitboxStartY, hitboxEndY);
-
-				//Print Value "on" Plate
-				if(printValue) {
-					gc.setLineWidth(0.5);
-					gc.setFill(Color.BLACK);
-					valueTextX = newX + (p.getPhysicalWidth()/2) ;
-					valueTextY = newY+valueTextOffsetY;
-					gc.strokeText(""+p.getValue(), valueTextX, valueTextY);
-				}
-				
-				// Setting the new Startposition
-				newY -= p.getPhysicalHeight() + plateGap;
-			}
-		}
-	}
 
 	/**
 	 * Move Plates from one Tower to another one
@@ -613,18 +522,91 @@ public class Gui extends Application {
 		return max - 1;
 	}
 	
+	public void clickLogicSimple(Tower[] towerSet, double clickX, double clickY) {
+		boolean moved = false;
+		Tower from = null;
+		
+		for (Tower t : towerSet) {
+			if (!t.getPlates().isEmpty()) {
+				
+				//Plates can only be "clicked" if their are on a Tower, where another one is already clicked or
+				//no Tower is selected at that moment.
+				if (t == getPlatesFrom() || getPlatesFrom() == null) {
+					for (Plate p : t.getPlates()) {
+						// Checks if Hitbox of a Plate is hit
+						if (hitMatch(p.getHitbox(), clickX, clickY)) {
+							// Checks if Plates already Hit
+							if (!p.getHitbox().isHit()) {
+								// Saves Tower, from which Plate shall be moved.
+								platesFrom(t);
+								// Set Hit for Hitbox on true
+								p.getHitbox().setHit(true);
+								increaseAmountPlatesHit();
+								addPlateToMove(p);
+							} else {
+								p.getHitbox().setHit(false);
+								decreaseAmountPlatesHit();
+								removePlateToMove(p);
+								if (platesToMove.isEmpty())
+									platesFrom(null);
+							}
+						} // if
+					} // for
+				} // if
+			} // if
+			
+			//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
+			//Plates are selected.
+			if (hitMatch(t.getHitbox(), clickX, clickY)) {
+				if (!t.getHitbox().isHit() && getAmountPlatesHit() != 0) {
+					t.getHitbox().setHit(true);
+					from = getPlatesFrom();
+					
+					//Plates are moved from a Tower to another (t)
+					try {
+						moved = movePlates(from, t, getPlateToMove());
+						if (moved) {
+							
+							//Reset the hitbox of the both involved towers
+							//and reset the Plates that must be moved to zero.
+							resetAmountPlatesHit();
+							t.getHitbox().setHit(false);
+							from.getHitbox().setHit(false);
+							resetPlatesFrom();
+						} else {
+							
+							//When the Plates are not moved, then t is no longer a available destination.
+							t.getHitbox().setHit(false);
+						}
+					} catch (NullPointerException exception) {
+						exception.printStackTrace();
+					}
+				} else
+					//Tower is not a destination, when no plates are selected, or the tower is already hit,
+					//because it would be the source of plates then.
+					t.getHitbox().setHit(false);
+			}
+		}
+	}
+	
+	private void waitToCount() {
+		
+	}
+	
+	private void timer() {
+		
+	}
 	/**
 	 * Start for the GUI Interface for Useractivity
 	 */
 	@Override
 	public void start(Stage primaryStage) {
-		calculateMaxNumber(8);
 
 		// Main Elements
 		GridPane root = new GridPane();
 		Canvas showCase = new Canvas(windowWidth, windowHeight);
 		GraphicsContext gc = showCase.getGraphicsContext2D();
-
+		
 		root.add(menu, 0, 0);
 		root.add(showCase, 0, 1);
 
@@ -665,7 +647,7 @@ public class Gui extends Application {
 
 		//New Session Section
 		Stage newWindow = new Stage();
-		newWindow.setScene(new Scene(newEntryWindow, 350, 250));
+		newWindow.setScene(new Scene(newSessionWindow, 350, 250));
 		newSession.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -812,86 +794,6 @@ public class Gui extends Application {
 			}
 		});
 		
-		//Handles the Mouseclicks on Plates an Towers.
-		showCase.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-				boolean moved = false;
-				Tower from = null;
-				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
-				gc.setFill(Color.BLACK);
-				
-				//A small Oval for showing, where the user clicked on the canvas.
-				gc.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
-				for (Tower t : towerSet) {
-					if (!t.getPlates().isEmpty()) {
-						
-						//Plates can only be "clicked" if their are on a Tower, where another one is already clicked or
-						//no Tower is selected at that moment.
-						if (t == getPlatesFrom() || getPlatesFrom() == null) {
-							for (Plate p : t.getPlates()) {
-								// Checks if Hitbox of a Plate is hit
-								if (hitMatch(p.getHitbox(), e.getX(), e.getY())) {
-									// Checks if Plates already Hit
-									if (!p.getHitbox().isHit()) {
-										// Saves Tower, from which Plate shall be moved.
-										platesFrom(t);
-										// Set Hit for Hitbox on true
-										p.getHitbox().setHit(true);
-										increaseAmountPlatesHit();
-										addPlateToMove(p);
-									} else {
-										p.getHitbox().setHit(false);
-										decreaseAmountPlatesHit();
-										removePlateToMove(p);
-										if (platesToMove.isEmpty())
-											platesFrom(null);
-									}
-								} // if
-							} // for
-						} // if
-					} // if
-					
-					//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
-					//Plates are selected.
-					if (hitMatch(t.getHitbox(), e.getX(), e.getY())) {
-						if (!t.getHitbox().isHit() && getAmountPlatesHit() != 0) {
-							t.getHitbox().setHit(true);
-							from = getPlatesFrom();
-							
-							//Plates are moved from a Tower to another (t)
-							try {
-								moved = movePlates(from, t, getPlateToMove());
-								if (moved) {
-									
-									//Reset the hitbox of the both involved towers
-									//and reset the Plates that must be moved to zero.
-									resetAmountPlatesHit();
-									t.getHitbox().setHit(false);
-									from.getHitbox().setHit(false);
-									resetPlatesFrom();
-								} else {
-									
-									//When the Plates are not moved, then t is no longer a available destination.
-									t.getHitbox().setHit(false);
-								}
-							} catch (NullPointerException exception) {
-								exception.printStackTrace();
-							}
-						} else
-							//Tower is not a destination, when no plates are selected, or the tower is already hit,
-							//because it would be the source of plates then.
-							t.getHitbox().setHit(false);
-					}
-				}
-			}
-		});
-
-		showCase.setOnMouseDragEntered(new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-
-			}
-		});
-
 		//Quit and ends the Session
 		quit.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -901,11 +803,27 @@ public class Gui extends Application {
 			}
 		});
 
+		towerValue.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent e) {
+				if(showTowerValue) setShowTowerValue(false);
+				else setShowTowerValue(true);
+			}
+		});
+		
+		plateValue.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				if(showPlateValue) setShowPlateValue(false);
+				else setShowPlateValue(true);
+			}
+		});
+		
 		//Info about the Program, the authors and the version.
 		info.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				String contentText = "Autoren: Eric Misfeld, Jonathan Dransfeld\n" + "Version 0.8, 12.08.2019\n\n"
+				String contentText = "Autoren: Eric Misfeld, Jonathan Dransfeld\n" + "Version 1.0, 12.08.2019\n\n"
 						+ "Dieses Programm veranschaunlicht das Zaehlen\n" + "im Binaersystem anhand der\n"
 						+ "Tuerme von Hanoi.";
 				Alert information = new Alert(AlertType.INFORMATION);
@@ -915,12 +833,45 @@ public class Gui extends Application {
 				information.showAndWait();
 			}
 		});
+		
+		
+		
+		//Handles the Mouseclicks on Plates an Towers.
+		showCase.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				boolean moved = false;
+				Tower from = null;
+				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+				gc.setFill(Color.BLACK);
+				System.out.println("X: " + e.getX() + ", Y: " + e.getY());
+				//A small Oval for showing, where the user clicked on the canvas.
+				gc.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
+				clickLogicSimple(towerSet, e.getX(), e.getY());
+			}
+		});
 
+		showCase.setOnMouseDragEntered(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+
+			}
+		});
+
+
+		double time = 0;
+		
 		//A Timer, that creates an "endles" loop
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				drawTower(gc, app.getTowerSet());
+//				switch(gamemode) {
+//				case FREE: break;
+//				case CHALLENGE: break;
+//				}
+//				drawTower(gc, app.getTowerSet());
+				
+				CanvasUtilitys.drawTower(gc, app.getTowerSet().getTowers(), showTowerValue);
+				CanvasUtilitys.drawPlates(gc, app.getTowerSet().getTowers(), showPlateValue);
+				CanvasUtilitys.drawCountdown(gc, time);
 			}
 		}.start();
 

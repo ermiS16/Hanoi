@@ -26,7 +26,7 @@ public class Hitbox {
 	 */
 	public void setHitbox(double xStart, double xEnd, double yStart, double yEnd) {		
 		double width = xEnd - xStart;
-		double height = yStart - yEnd;
+		double height = yEnd - yStart;
 		this.hitbox = new Rectangle(xStart, yStart, width, height);
 	}
 	
@@ -60,6 +60,22 @@ public class Hitbox {
 	 */
 	public double getY() {
 		return this.hitbox.getY();
+	}
+	
+	public double getMinX() {
+		return this.hitbox.getLayoutBounds().getMinX();
+	}
+	
+	public double getMaxX() {
+		return this.hitbox.getLayoutBounds().getMaxX();
+	}
+	
+	public double getMinY() {
+		return this.hitbox.getLayoutBounds().getMinY();
+	}
+	
+	public double getMaxY() {
+		return this.hitbox.getLayoutBounds().getMaxY();
 	}
 	
 	/**

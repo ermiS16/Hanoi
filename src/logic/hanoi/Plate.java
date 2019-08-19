@@ -11,9 +11,10 @@ import gui.Hitbox;
 
 public class Plate implements Comparable<Object>{
 	
-	private static final double MAXWIDTH = 150;
-	private static final double MINWIDTH = 30;
-	private static final double HEIGHT = 15;
+	private static final double MAX_WIDTH = 150;
+	private static final double MIN_WIDTH = 30;
+	private static final double MIN_HEIGHT = 3;
+	private static final double MAX_HEIGHT = 15;
 	
 	private int value;
 	private Hitbox hitbox;
@@ -33,13 +34,16 @@ public class Plate implements Comparable<Object>{
 	}
 		
 	public static double getMinWidth() {
-		return MINWIDTH;
+		return MIN_WIDTH;
 	}
 	public static double getMaxWidth() {
-		return MAXWIDTH;
+		return MAX_WIDTH;
 	}
-	public static double getHeight() {
-		return HEIGHT;
+	public static double getMaxHeight() {
+		return MAX_HEIGHT;
+	}
+	public static double getMinHeight() {
+		return MIN_HEIGHT;
 	}
 	
 	public void setPhysicalParameters(double width, double height) {
@@ -84,6 +88,17 @@ public class Plate implements Comparable<Object>{
 			e.printStackTrace();
 		}
 		return compare;
+	}
+	
+	@Override
+	public boolean equals (Object obj) {
+		boolean result = false;
+		if (this == obj) return true;
+		if(obj instanceof Plate){
+			Plate plate = (Plate) obj;
+			if (this.getValue() == plate.getValue()) result = true; 
+		}
+		return result;
 	}
 	
 	@Override

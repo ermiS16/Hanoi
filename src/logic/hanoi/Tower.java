@@ -20,6 +20,9 @@ import java.util.List;
 public class Tower {
 	private static final String EMPTY_REPRESENTATIVE = "0";
 	private static final int BINARAY_SYSTEM = 2;
+//	private static final double  MAX_HEIGHT = 250;
+	private static final double MIN_HEIGHT = 20;
+	private static final double WIDTH = 20;
 	
 	//determines the sorting oder on this tower
 	private static final Comparator<Plate> PLATE_SORTING_ORDER = new Comparator<Plate>() {
@@ -56,8 +59,8 @@ public class Tower {
 		this.platesOnThisTower = new ArrayList<Plate>();
 		this.hitbox = new Hitbox();
 		this.pos = new Position();
-		this.physicalHeight = 0;
-		this.physicalWidth = 0;
+		this.physicalHeight = MIN_HEIGHT;
+		this.physicalWidth = WIDTH;
 		this.id = id;
 		
 		//if initWithPlates is true, create plates for this tower
@@ -102,6 +105,13 @@ public class Tower {
 	 */
 	public double getPhysicalWidth() {
 		return this.physicalWidth;
+	}
+	
+	public static double getMinHeight() {
+		return MIN_HEIGHT;
+	}
+	public static double getMinWidth() {
+		return WIDTH;
 	}
 	
 	/**
