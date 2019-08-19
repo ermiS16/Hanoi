@@ -63,9 +63,9 @@ public class CanvasUtilitys {
 			double hitBoxStartY = newY - t.getPhysicalHeight();
 			double hitBoxEndY = newY;
 			t.getHitbox().setHitbox(hitBoxStartX, hitBoxEndX, hitBoxStartY, hitBoxEndY);
-			System.out.println("Tower: " + towerIndex + "\nMin X: " + t.getHitbox().getMinX()
-					+ ", Max X: " + t.getHitbox().getMaxX() + "\nMin Y: " + t.getHitbox().getMinY()
-					+ ", Max Y: "+ t.getHitbox().getMaxY());
+//			System.out.println("Tower: " + towerIndex + "\nMin X: " + t.getHitbox().getMinX()
+//					+ ", Max X: " + t.getHitbox().getMaxX() + "\nMin Y: " + t.getHitbox().getMinY()
+//					+ ", Max Y: "+ t.getHitbox().getMaxY());
 				
 			
 			// Name of Tower
@@ -144,9 +144,9 @@ public class CanvasUtilitys {
 					hitboxEndY = newY + p.getPhysicalHeight();
 					p.getHitbox().setHitbox(hitBoxStartX, hitboxEndX, hitboxStartY, hitboxEndY);
 					
-					System.out.println("Plate: " + plateIndex + "\nMin X: " + p.getHitbox().getMinX()
-							+ ", Max X: " + p.getHitbox().getMaxX() + "\nMin Y: " + p.getHitbox().getMinY()
-							+ ", Max Y: "+ p.getHitbox().getMaxY());
+//					System.out.println("Plate: " + plateIndex + "\nMin X: " + p.getHitbox().getMinX()
+//							+ ", Max X: " + p.getHitbox().getMaxX() + "\nMin Y: " + p.getHitbox().getMinY()
+//							+ ", Max Y: "+ p.getHitbox().getMaxY());
 					
 					//Show Value "on" Plate
 					if(showPlateValue) {

@@ -125,6 +125,7 @@ public class Gui extends Application {
 	private int amountPlatesHit;
 	private boolean showPlateValue;
 	private List<Plate> platesToMove;
+	private boolean plateSelected;
 	
 	// Necessary Stuff
 	private App app;
@@ -150,6 +151,7 @@ public class Gui extends Application {
 		sameExport = false;
 		showPlateValue = true;
 		showTowerValue = true;
+		plateSelected = false;
 		
 //		//For New Entry
 		newSessionWindow = new GridPane();
@@ -402,6 +404,12 @@ public class Gui extends Application {
 	private boolean getShowTowerValue() {
 		return this.showTowerValue;
 	}
+	private void setPlateSelected(boolean select) {
+		this.plateSelected = select;
+	}
+	private boolean plateSelected() {
+		return this.plateSelected;
+	}
 	
 	
 	
@@ -516,12 +524,76 @@ public class Gui extends Application {
 	 * @param bitlength
 	 * @return max Number, that can be represented
 	 */
-	public int calculateMaxNumber(int bitlength) {
+	private int calculateMaxNumber(int bitlength) {
 		int max = 1;
 		max <<= (int) bitlength;
 		return max - 1;
 	}
 	
+	/**
+	 * Hard Logic for the Movement of Plate. Only the Plate on the Top is movable.
+	 * @param towerSet Towerset with all Towers of the Session
+	 * @param clickX Point on x-Axis
+	 * @param clickY Point on y-Axis
+	 */
+	public void clickLogicHard(Tower[] towerSet, double clickX, double clickY) {
+		boolean moved = false;
+		Tower from = null;
+		
+		for(Tower t : towerSet) {
+			if(!t.getPlates().isEmpty() && !plateSelected()) {
+				for(Plate p : t.getPlates()) {
+					if(hitMatch(p.getHitbox(), clickX, clickY)) {
+						if(!p.getHitbox().isHit()) {
+							platesFrom(t);
+							p.getHitbox().setHit(true);
+							setPlateSelected(true);
+							addPlateToMove(p);
+						}else {
+							p.getHitbox().setHit(false);
+							removePlateToMove(p);
+							setPlateSelected(false);
+							if(platesToMove.isEmpty()) from=null;
+						} // else
+					} // if
+				} // for
+			} //if
+			
+			if(hitMatch(t.getHitbox(), clickX, clickY)) {
+				if(!t.getHitbox().isHit() && plateSelected()) {
+					t.getHitbox().setHit(true);
+					from = getPlatesFrom();
+					try {
+						moved = movePlates(from,t, getPlateToMove());
+						if(moved) {
+							setPlateSelected(false);
+							t.getHitbox().setHit(false);
+							from.getHitbox().setHit(false);
+							resetPlatesFrom();
+						}else {
+							t.getHitbox().setHit(false);
+							setPlateSelected(false);
+						}
+					}catch(NullPointerException npe) {
+						npe.printStackTrace();
+					}
+				}else {
+					t.getHitbox().setHit(false);
+				}
+			}
+		
+		
+		
+		
+		} // for
+	}
+	
+	/**
+	 * 
+	 * @param towerSet
+	 * @param clickX
+	 * @param clickY
+	 */
 	public void clickLogicSimple(Tower[] towerSet, double clickX, double clickY) {
 		boolean moved = false;
 		Tower from = null;
@@ -547,13 +619,11 @@ public class Gui extends Application {
 								p.getHitbox().setHit(false);
 								decreaseAmountPlatesHit();
 								removePlateToMove(p);
-								if (platesToMove.isEmpty())
-									platesFrom(null);
-							}
+								if (platesToMove.isEmpty()) platesFrom(null);
+							} // else
 						} // if
-					} // for
+					} // fpr
 				} // if
-			} // if
 			
 			//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
 			//Plates are selected.
@@ -585,6 +655,7 @@ public class Gui extends Application {
 					//Tower is not a destination, when no plates are selected, or the tower is already hit,
 					//because it would be the source of plates then.
 					t.getHitbox().setHit(false);
+				}
 			}
 		}
 	}
@@ -846,7 +917,8 @@ public class Gui extends Application {
 				System.out.println("X: " + e.getX() + ", Y: " + e.getY());
 				//A small Oval for showing, where the user clicked on the canvas.
 				gc.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
-				clickLogicSimple(towerSet, e.getX(), e.getY());
+//				clickLogicSimple(towerSet, e.getX(), e.getY());
+				clickLogicHard(towerSet, e.getX(), e.getY());
 			}
 		});
 
