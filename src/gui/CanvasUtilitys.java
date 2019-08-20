@@ -4,6 +4,7 @@ import java.util.List;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.FillRule;
 import logic.hanoi.Plate;
 import logic.hanoi.Tower;
 
@@ -169,4 +170,14 @@ public class CanvasUtilitys {
 		
 	}
 	
+	public static void drawMouseSelect(GraphicsContext gc, double xStart, double xEnd, double yStart, double yEnd) {
+		gc.setFill(Color.BLACK);
+
+		gc.strokeLine(xStart, yStart, xEnd, yStart);
+		gc.strokeLine(xEnd, yStart, xEnd, yEnd);
+		gc.strokeLine(xStart, yStart, xStart, yEnd);
+		gc.strokeLine(xStart, yEnd, xEnd, yEnd);
+		
+		gc.setLineWidth(1);
+	}
 }

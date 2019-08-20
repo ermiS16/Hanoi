@@ -6,12 +6,8 @@ import logic.hanoi.DifficultyLevel;
 import logic.hanoi.GameModes;
 import logic.hanoi.MoveHandler;
 import logic.hanoi.Plate;
-import logic.hanoi.PlateComperator;
 import logic.hanoi.Tower;
-import logic.hanoi.TowerSet;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -37,7 +33,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
-import javafx.scene.control.TextArea;
 import javafx.scene.canvas.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -110,24 +105,20 @@ public class Gui extends Application {
 	private Label labelNumber;
 	private TextField varBitWidth;
 	private Label varNumber;
+	private Rectangle2D dragSelect;
 
 	
 	//Tower relevated stuff
-	private static final double SCALING_FACTOR_TOWER_Y = 3;
 	private static final int MAX_AMOUNT_TOWERS = 6;
 	private static final int MIN_AMOUNT_TOWERS = 3;
 	private static final int MAX_BITWIDTH = 16;
 	private static final int MIN_BITWIDTH = 3;
 	private Tower[] towerSet;
-	private Tower platesFrom;
 	private boolean showTowerValue;
 	
 	//Plate relevated stuff
-	private int amountPlatesHit;
 	private boolean showPlateValue;
-	private List<Plate> platesToMove;
-	private boolean plateSelected;
-	
+
 	// Necessary Stuff
 	private App app;
 	private MoveHandler moveHandler;
@@ -149,11 +140,7 @@ public class Gui extends Application {
 		screenBounds = Screen.getPrimary().getVisualBounds();
 		windowWidth = (screenBounds.getWidth() * REL_WINDOW_SIZE_FACTOR);
 		windowHeight = screenBounds.getHeight() * REL_WINDOW_SIZE_FACTOR;
-		sameSave = false;
-		sameExport = false;
-		showPlateValue = true;
-		showTowerValue = true;
-		plateSelected = false;
+
 		
 //		//For New Entry
 		newSessionWindow = new GridPane();
@@ -224,8 +211,9 @@ public class Gui extends Application {
 		newSessionWindow.add(newSessionOk, 0, 7);
 		newSessionWindow.add(newSessionCancel, 1, 7);
 
-		// Mouse Context Menu
+		// Mouse Context
 		mouseContextMenu = new ContextMenu();
+		dragSelect = new Rectangle2D(0, 0, 0, 0);
 
 		// Menu Items
 		quit = new MenuItem("exit");
@@ -278,10 +266,13 @@ public class Gui extends Application {
 		fileChooserExport.initialFileNameProperty().set("image.png");
 		fileChooserExport.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
 		
-		amountPlatesHit = 0;
-		platesFrom = null;
-		platesToMove = new ArrayList<>();
+		//Session Stuff
 		app = createScene();
+		
+		sameSave = false;
+		sameExport = false;
+		showPlateValue = true;
+		showTowerValue = true;
 		
 		moveHandler = new MoveHandler();
 		gameMode = GameModes.FREE;
@@ -385,108 +376,7 @@ public class Gui extends Application {
 	
 //----------------------------------------------------//
 
-//	/**
-//	 * Move Plates from one Tower to another one
-//	 * Return true if it was successful, false if not.
-//	 * 
-//	 * @param from The Tower from where Plated must to be moved
-//	 * @param to The Tower where Plates must be moved
-//	 * @param plateMoveList List of Plates that shall be moved
-//	 * @return true if plates are moved successful, false otherwise
-//	 */
-//	private boolean movePlates(Tower from, Tower to, List<Plate> plateMoveList) {
-//		boolean moved = false;
-//		int platesAmount = platesToMove.size();
-//		if (to == from) {
-//			return false;
-//		}
-//
-//		int lsba = from.getLSBAValue();
-//
-//		// if the smallest plate on the receiving tower is smaller than this lsba, this
-//		// can't be done
-//		if (lsba > to.getLSBAValue()) {
-//			return false;
-//		}
-//
-//		List<Plate> moveList = new ArrayList<>();
-//		//Checks if List of Plates are Movable as a whole
-//		if (movable(from, getPlateToMove())) {
-//			
-//			//Every Plates is removed from the tower that owns them
-//			for (Plate p : getPlateToMove()) {
-//				from.removeOfValue(platesAmount, from.getLSBAValue(), false);
-//				p.getHitbox().setHit(false);
-//				moveList.add(p);
-//			}
-//
-//			// add plates to receiving tower
-//			to.addPlates(lsba, platesAmount, moveList);
-//
-//			// Remove all Plates that has moved
-//			removePlateToMoveAll(getPlateToMove());
-//
-//			//Recalculate both towers
-//			from.recalculate();
-//			to.recalculate();
-//
-//			moved = true;
-//		
-//		} else {
-//			moved = false;
-//		}
-//		return moved;
-//	}
 
-//	/**
-//	 * Checks if a Hitbox is Hit by the Cursor.
-//	 * 
-//	 * @param hitbox The Hitbox to be checked
-//	 * @param x      Coordinate on X-Axis
-//	 * @param y      Coordinate on y-Axis
-//	 * @return true if Hit, false otherwise
-//	 */
-//	private boolean hitMatch(Hitbox hitbox, double x, double y) {
-//		if (hitbox.contains(x, y))
-//			return true;
-//		else
-//			return false;
-//	}
-
-//	/**
-//	 * Checks if a List of Plates is Moable as a whole from a certain Tower
-//	 * 
-//	 * @param tower     whose Plates shall be checked
-//	 * @param plateList List of Plates, that shall be moved.
-//	 * @return true if Plates can be moved as a whole, false otherwise.
-//	 */
-//	private boolean movable(Tower tower, List<Plate> plateList) {
-//		PlateComperator sortingOrder = new PlateComperator();
-//		plateList.sort(sortingOrder.PLATE_SORTING_ORDER);
-//
-//		// Value of Plate on the Top.
-//		int lsba = tower.getLSBAValue();
-//		boolean movable = true;
-//
-//		// Special Cases
-//		if (tower.getPlates().size() < plateList.size())
-//			return false;
-//		else if (tower.getPlates().size() < 1)
-//			return false;
-//		else if (tower.getPlates().size() == 1)
-//			return true;
-//
-//		// Iterates from the Plate on the Top down, to check if following plates
-//		// are Contained in the List of Plates, that has to move.
-//		else {
-//			for (int i = 0, k = tower.getPlates().size() - 1; i < plateList.size(); i++, k--) {
-//				if (plateList.get(i) != tower.getPlates().get(k)) {
-//					movable = false;
-//				}
-//			}
-//		}
-//		return movable;
-//	}
 
 	/**
 	 * Calculates the maximal number that can reprensented with a bitlength
@@ -500,132 +390,7 @@ public class Gui extends Application {
 		return max - 1;
 	}
 	
-//	/**
-//	 * Hard Logic for the Movement of Plate. Only the Plate on the Top is movable.
-//	 * @param towerSet Towerset with all Towers of the Session
-//	 * @param clickX Point on x-Axis
-//	 * @param clickY Point on y-Axis
-//	 */
-//	private void clickLogicHard(Tower[] towerSet, double clickX, double clickY) {
-//		boolean moved = false;
-//		Tower from = null;
-//		
-//		for(Tower t : towerSet) {
-//			if(!t.getPlates().isEmpty() && !plateSelected()) {
-//				for(Plate p : t.getPlates()) {
-//					if(hitMatch(p.getHitbox(), clickX, clickY)) {
-//						if(!p.getHitbox().isHit()) {
-//							platesFrom(t);
-//							p.getHitbox().setHit(true);
-//							setPlateSelected(true);
-//							addPlateToMove(p);
-//						}else {
-//							p.getHitbox().setHit(false);
-//							removePlateToMove(p);
-//							setPlateSelected(false);
-//							if(getPlateToMove().isEmpty()) from=null;
-//						} // else
-//					} // if
-//				} // for
-//			} //if
-//			
-//			if(hitMatch(t.getHitbox(), clickX, clickY)) {
-//				if(!t.getHitbox().isHit() && plateSelected()) {
-//					t.getHitbox().setHit(true);
-//					from = getPlatesFrom();
-//					try {
-//						moved = movePlates(from,t, getPlateToMove());
-//						if(moved) {
-//							setPlateSelected(false);
-//							t.getHitbox().setHit(false);
-//							from.getHitbox().setHit(false);
-//							resetPlatesFrom();
-//						}else {
-//							t.getHitbox().setHit(false);
-//							setPlateSelected(false);
-//						}
-//					}catch(NullPointerException npe) {
-//						npe.printStackTrace();
-//					}
-//				}else {
-//					t.getHitbox().setHit(false);
-//				}
-//			}
-//		} // for
-//	}
-	
-	/**
-	 * Simple Logic for movement of Plates. More than one Plate is movable.
-	 * @param towerSet
-	 * @param clickX
-	 * @param clickY
-	 */
-//	private void clickLogicMiddle(Tower[] towerSet, double clickX, double clickY) {
-//		boolean moved = false;
-//		Tower from = null;
-//		
-//		for (Tower t : towerSet) {
-//			if (!t.getPlates().isEmpty()) {
-//				
-//				//Plates can only be "clicked" if their are on a Tower, where another one is already clicked or
-//				//no Tower is selected at that moment.
-//				if (t == getPlatesFrom() || getPlatesFrom() == null) {
-//					for (Plate p : t.getPlates()) {
-//						// Checks if Hitbox of a Plate is hit
-//						if (hitMatch(p.getHitbox(), clickX, clickY)) {
-//							// Checks if Plates already Hit
-//							if (!p.getHitbox().isHit()) {
-//								// Saves Tower, from which Plate shall be moved.
-//								platesFrom(t);
-//								// Set Hit for Hitbox on true
-//								p.getHitbox().setHit(true);
-//								increaseAmountPlatesHit();
-//								addPlateToMove(p);
-//							} else {
-//								p.getHitbox().setHit(false);
-//								decreaseAmountPlatesHit();
-//								removePlateToMove(p);
-//								if (getPlateToMove().isEmpty()) platesFrom(null);
-//							} // else
-//						} // if
-//					} // fpr
-//				} // if
-//			
-//			//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
-//			//Plates are selected.
-//			if (hitMatch(t.getHitbox(), clickX, clickY)) {
-//				if (!t.getHitbox().isHit() && getAmountPlatesHit() != 0) {
-//					t.getHitbox().setHit(true);
-//					from = getPlatesFrom();
-//					
-//					//Plates are moved from a Tower to another (t)
-//					try {
-//						moved = movePlates(from, t, getPlateToMove());
-//						if (moved) {
-//							
-//							//Reset the hitbox of the both involved towers
-//							//and reset the Plates that must be moved to zero.
-//							resetAmountPlatesHit();
-//							t.getHitbox().setHit(false);
-//							from.getHitbox().setHit(false);
-//							resetPlatesFrom();
-//						} else {
-//							
-//							//When the Plates are not moved, then t is no longer a available destination.
-//							t.getHitbox().setHit(false);
-//						}
-//					} catch (NullPointerException exception) {
-//						exception.printStackTrace();
-//					}
-//				} else
-//					//Tower is not a destination, when no plates are selected, or the tower is already hit,
-//					//because it would be the source of plates then.
-//					t.getHitbox().setHit(false);
-//				}
-//			}
-//		}
-//	}
-	
+
 	private void waitToCount() {
 		
 	}
@@ -880,7 +645,7 @@ public class Gui extends Application {
 				Tower from = null;
 				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 				gc.setFill(Color.BLACK);
-				System.out.println("X: " + e.getX() + ", Y: " + e.getY());
+//				System.out.println("X: " + e.getX() + ", Y: " + e.getY());
 				//A small Oval for showing, where the user clicked on the canvas.
 				gc.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
 				switch(getDifficulty()) {
@@ -898,16 +663,36 @@ public class Gui extends Application {
 			}
 		});
 
-		showCase.setOnMouseDragEntered(new EventHandler<MouseEvent>() {
+		showCase.setOnMousePressed(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
-
+				moveHandler.setDragStartX(e.getX());
+				moveHandler.setDragStartY(e.getY());
+				System.out.println("X: " + e.getX() + ", Y: " + e.getY());	
 			}
 		});
-
-
+		
+		showCase.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				
+				moveHandler.setDragEndX(e.getX());
+				moveHandler.setDragEndY(e.getY());
+				double width = moveHandler.getDragEndX() - moveHandler.getDragEndX();
+				double height = moveHandler.getDragStartY() - moveHandler.getDragEndY();
+				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+				CanvasUtilitys.drawMouseSelect(gc, moveHandler.getDragStartX(), moveHandler.getDragEndX(), 
+													moveHandler.getDragStartY(), moveHandler.getDragEndY());
+			}
+		});
+		
+		showCase.setOnMouseReleased(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				System.out.println("Mousedrag Exit");
+			}
+		});
+		
 		double time = 0;
 		
-		//A Timer, that creates an "endles" loop
+		//A Timer, that creates an "endless" loop
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {

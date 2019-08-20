@@ -11,13 +11,23 @@ public class MoveHandler {
 	private List<Plate> platesToMove;
 	private int amountPlatesHit;
 	private Tower platesFrom;
+	private double dragStartX;
+	private double dragEndX;
+	private double dragStartY;
+	private double dragEndY;
 	
 	public MoveHandler() {
 		this.plateSelected = false;
 		this.platesToMove = new ArrayList<>();
 		this.amountPlatesHit = 0;
 		this.platesFrom = null;
+		this.dragStartX = 0;
+		this.dragStartY = 0;
+		this.dragEndX = 0;
+		this.dragEndY = 0;
 	}
+	
+	//-------------Getter & Setter------------//
 	
 	public void setPlateSelected(boolean select) {
 		this.plateSelected = select;
@@ -69,6 +79,40 @@ public class MoveHandler {
 	public void resetPlatesFrom() {
 		this.platesFrom = null;
 	}
+	
+	public double getDragStartX() {
+		return this.dragStartX;
+	}
+	
+	public void setDragStartX(double xStart) {
+		this.dragStartX = xStart;
+	}
+	
+	public double getDragStartY() {
+		return this.dragStartY;
+	}
+	
+	public void setDragStartY(double yStart) {
+		this.dragStartY = yStart;
+	}
+	
+	public double getDragEndX() {
+		return this.dragEndX;
+	}
+	
+	public void setDragEndX(double xEnd) {
+		this.dragEndX = xEnd;
+	}
+	
+	public double getDragEndY() {
+		return this.dragEndY;
+	}
+	
+	public void setDragEndY(double yEnd) {
+		this.dragEndY = yEnd;
+	}
+	
+	//----------------------------//
 	
 	/**
 	 * Move Plates from one Tower to another one
@@ -136,8 +180,6 @@ public class MoveHandler {
 		PlateComperator sortingOrder = new PlateComperator();
 		plateList.sort(sortingOrder.PLATE_SORTING_ORDER);
 
-		// Value of Plate on the Top.
-		int lsba = tower.getLSBAValue();
 		boolean movable = true;
 
 		// Special Cases

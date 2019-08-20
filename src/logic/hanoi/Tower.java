@@ -20,7 +20,7 @@ import java.util.List;
 public class Tower {
 	private static final String EMPTY_REPRESENTATIVE = "0";
 	private static final int BINARAY_SYSTEM = 2;
-//	private static final double  MAX_HEIGHT = 250;
+	private static final double  MAX_HEIGHT = 250;
 	private static final double MIN_HEIGHT = 20;
 	private static final double WIDTH = 20;
 	
