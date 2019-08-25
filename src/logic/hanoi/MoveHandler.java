@@ -3,6 +3,8 @@ package logic.hanoi;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sun.javafx.geom.Rectangle;
+
 import gui.Hitbox;
 
 public class MoveHandler {
@@ -15,6 +17,7 @@ public class MoveHandler {
 	private double dragEndX;
 	private double dragStartY;
 	private double dragEndY;
+	private Hitbox hitbox;
 	
 	public MoveHandler() {
 		this.plateSelected = false;
@@ -25,6 +28,7 @@ public class MoveHandler {
 		this.dragStartY = 0;
 		this.dragEndX = 0;
 		this.dragEndY = 0;
+		this.hitbox = new Hitbox();
 	}
 	
 	//-------------Getter & Setter------------//
@@ -112,6 +116,10 @@ public class MoveHandler {
 		this.dragEndY = yEnd;
 	}
 	
+	public Hitbox getHitbox() {
+		return this.hitbox;
+	}
+	
 	//----------------------------//
 	
 	/**
@@ -158,7 +166,7 @@ public class MoveHandler {
 			//Recalculate both towers
 			from.recalculate();
 			to.recalculate();
-
+			
 			moved = true;
 		
 		} else {
@@ -166,7 +174,6 @@ public class MoveHandler {
 		}
 		return moved;
 	}
-	
 	
 	
 	/**
@@ -202,6 +209,88 @@ public class MoveHandler {
 		return movable;
 	}
 	
+	private void setHitbox() {
+		if(this.getDragStartX() > this.getDragEndX()) {
+			double tmp = this.getDragStartX();
+			setDragStartX(this.getDragEndX());
+			setDragEndX(tmp);
+		}else if(this.getDragStartY() > this.getDragEndY()) {
+			double tmp = this.getDragStartY();
+			setDragStartY(this.getDragEndY());
+			setDragEndY(tmp);
+		}
+		this.getHitbox().setHitbox(this.getDragStartX(), this.getDragEndX(), this.getDragStartY(), this.getDragEndY());
+	}
+	 
+	public void towerClicked(Tower tower, double clickX, double clickY) {
+		Tower from = null;
+		boolean moved = false;
+			
+		if (hitMatch(tower.getHitbox(), clickX, clickY)) {
+			if (!tower.getHitbox().isHit() && getAmountPlatesHit() != 0) {
+				tower.getHitbox().setHit(true);
+				from = getPlatesFrom();
+				
+				//Plates are moved from a Tower to another (t)
+				try {
+					moved = movePlates(from, tower, getPlateToMove());
+					if (moved) {
+						
+						//Reset the hitbox of the both involved towers
+						//and reset the Plates that must be moved to zero.
+						resetAmountPlatesHit();
+						tower.getHitbox().setHit(false);
+						from.getHitbox().setHit(false);
+						resetPlatesFrom();
+					} else {
+						
+						//When the Plates are not moved, then t is no longer a available destination.
+						tower.getHitbox().setHit(false);
+					}
+				} catch (NullPointerException exception) {
+					exception.printStackTrace();
+				}
+			//Tower is not a destination, when no plates are selected, or the tower is already hit,
+			//because it would be the source of plates then.
+			} else	tower.getHitbox().setHit(false);
+		}
+	}
+	
+	public void clickLogicSelectPlates(Tower[] towerSet) {
+		setHitbox();
+		boolean consistent = false;
+		Tower from = null;
+		
+		
+		for(Tower t : towerSet) {
+			if(!t.getPlates().isEmpty()) {
+				if(t == getPlatesFrom() || getPlatesFrom() == null) {
+					for(Plate p : t.getPlates()) {
+						consistent = p.getHitbox().calculateConsistency(this.getHitbox());
+						if(consistent) {
+							platesFrom(t);
+							p.getHitbox().setHit(true);
+							increaseAmountPlatesHit();
+							addPlateToMove(p);
+						}else {
+							p.getHitbox().setHit(false);
+							decreaseAmountPlatesHit();
+							removePlateToMove(p);
+							if(getPlateToMove().isEmpty()) platesFrom(null);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void selectMovablePlates() {
+		
+	}
+	
+	public void moveMovablePlates() {
+		
+	}
 	
 	public void clickLogicEasy(Tower[] towerSet, double clickX, double clickY) {
 		
@@ -245,37 +334,37 @@ public class MoveHandler {
 				} // if
 			} // if
 			
-			
-			//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
-			//Plates are selected.
-			if (hitMatch(t.getHitbox(), clickX, clickY)) {
-				if (!t.getHitbox().isHit() && getAmountPlatesHit() != 0) {
-					t.getHitbox().setHit(true);
-					from = getPlatesFrom();
-					
-					//Plates are moved from a Tower to another (t)
-					try {
-						moved = movePlates(from, t, getPlateToMove());
-						if (moved) {
-							
-							//Reset the hitbox of the both involved towers
-							//and reset the Plates that must be moved to zero.
-							resetAmountPlatesHit();
-							t.getHitbox().setHit(false);
-							from.getHitbox().setHit(false);
-							resetPlatesFrom();
-						} else {
-							
-							//When the Plates are not moved, then t is no longer a available destination.
-							t.getHitbox().setHit(false);
-						}
-					} catch (NullPointerException exception) {
-						exception.printStackTrace();
-					}
-				//Tower is not a destination, when no plates are selected, or the tower is already hit,
-				//because it would be the source of plates then.
-				} else	t.getHitbox().setHit(false);
-			}
+			towerClicked(t, clickX, clickY);
+//			//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
+//			//Plates are selected.
+//			if (hitMatch(t.getHitbox(), clickX, clickY)) {
+//				if (!t.getHitbox().isHit() && getAmountPlatesHit() != 0) {
+//					t.getHitbox().setHit(true);
+//					from = getPlatesFrom();
+//					
+//					//Plates are moved from a Tower to another (t)
+//					try {
+//						moved = movePlates(from, t, getPlateToMove());
+//						if (moved) {
+//							
+//							//Reset the hitbox of the both involved towers
+//							//and reset the Plates that must be moved to zero.
+//							resetAmountPlatesHit();
+//							t.getHitbox().setHit(false);
+//							from.getHitbox().setHit(false);
+//							resetPlatesFrom();
+//						} else {
+//							
+//							//When the Plates are not moved, then t is no longer a available destination.
+//							t.getHitbox().setHit(false);
+//						}
+//					} catch (NullPointerException exception) {
+//						exception.printStackTrace();
+//					}
+//				//Tower is not a destination, when no plates are selected, or the tower is already hit,
+//				//because it would be the source of plates then.
+//				} else	t.getHitbox().setHit(false);
+//			}
 		}
 	}
 
@@ -309,28 +398,29 @@ public class MoveHandler {
 				} // for
 			} //if
 			
-			if(hitMatch(t.getHitbox(), clickX, clickY)) {
-				if(!t.getHitbox().isHit() && plateSelected()) {
-					t.getHitbox().setHit(true);
-					from = getPlatesFrom();
-					try {
-						moved = movePlates(from,t, getPlateToMove());
-						if(moved) {
-							setPlateSelected(false);
-							t.getHitbox().setHit(false);
-							from.getHitbox().setHit(false);
-							resetPlatesFrom();
-						}else {
-							t.getHitbox().setHit(false);
-							setPlateSelected(false);
-						}
-					}catch(NullPointerException npe) {
-						npe.printStackTrace();
-					}
-				}else {
-					t.getHitbox().setHit(false);
-				}
-			}
+			towerClicked(t, clickX, clickY);
+//			if(hitMatch(t.getHitbox(), clickX, clickY)) {
+//				if(!t.getHitbox().isHit() && plateSelected()) {
+//					t.getHitbox().setHit(true);
+//					from = getPlatesFrom();
+//					try {
+//						moved = movePlates(from,t, getPlateToMove());
+//						if(moved) {
+//							setPlateSelected(false);
+//							t.getHitbox().setHit(false);
+//							from.getHitbox().setHit(false);
+//							resetPlatesFrom();
+//						}else {
+//							t.getHitbox().setHit(false);
+//							setPlateSelected(false);
+//						}
+//					}catch(NullPointerException npe) {
+//						npe.printStackTrace();
+//					}
+//				}else {
+//					t.getHitbox().setHit(false);
+//				}
+//			}
 		} // for
 	}
 	

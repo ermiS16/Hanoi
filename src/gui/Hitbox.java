@@ -1,5 +1,9 @@
 package gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.geometry.Point2D;
 import javafx.scene.shape.Rectangle;
 
 /**
@@ -12,9 +16,17 @@ public class Hitbox {
 	
 	private Rectangle hitbox;
 	private boolean isHit;
+	private double width;
+	private double height;
+	private List<Point2D> pointMatrix;
+
 	
 	public Hitbox() {
 		hitbox = new Rectangle();
+		this.isHit = false;
+		this.height = 0;
+		this.width = 0;
+		this.pointMatrix = new ArrayList<>();
 	}
 	
 	/**
@@ -24,10 +36,57 @@ public class Hitbox {
 	 * @param yStart Start on the y-Axis of the Canvas
 	 * @param yEnd End on the y-Axis of the Canvas
 	 */
-	public void setHitbox(double xStart, double xEnd, double yStart, double yEnd) {		
-		double width = xEnd - xStart;
-		double height = yEnd - yStart;
-		this.hitbox = new Rectangle(xStart, yStart, width, height);
+	public void setHitbox(double xStart, double xEnd, double yStart, double yEnd) {
+		
+		double tmp = 0;
+		if(xStart > xEnd) {
+			tmp = xStart;
+			xStart = xEnd;
+			xEnd = tmp;
+		}else if(yStart > yEnd) {
+			tmp = yStart;
+			yStart = yEnd;
+			yEnd = tmp;
+		}
+		
+		this.width = xEnd - xStart;
+		this.height = yEnd - yStart;
+		this.hitbox = new Rectangle(xStart, yStart, this.width, this.height);
+//		setPointMatrix();
+	}
+	
+	public void setPointMatrix() {
+		double x = Math.round(this.getMinX());
+		double y = Math.round(this.getMinY());
+		
+		for(int i=0; i<this.getWidth(); i++) {
+			for(int k=0; k<this.getHeight(); k++) {		
+				this.pointMatrix.add(new Point2D(x,y));
+				y++;
+			}
+			x++;
+		}
+	}
+	
+	public boolean calculateConsistency(Hitbox box) {
+		boolean consistent = false;
+		
+		double hitboxHalfWidth = this.getWidth()/2;
+		double hitboxHalfHeight = this.getHeight()/2;
+		if(box.getMinX()+box.getWidth() > this.getMinX()+hitboxHalfWidth &&
+				box.getMinY()+box.getHeight() > this.getMinY() + hitboxHalfHeight) {
+			consistent = true;
+		}
+	
+		
+		return consistent;
+	}
+	
+	
+	
+	
+	public List<Point2D> getPointMatrix(){
+		return this.pointMatrix;
 	}
 	
 	/**
@@ -78,6 +137,13 @@ public class Hitbox {
 		return this.hitbox.getLayoutBounds().getMaxY();
 	}
 	
+	public double getWidth() {
+		return this.width;
+	}
+	
+	public double getHeight() {
+		return this.height;
+	}
 	/**
 	 * Return whether or not the Point(x,y) 
 	 * lays inbetween the Hitbox

@@ -1,5 +1,7 @@
 package gui;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import javafx.scene.canvas.GraphicsContext;
@@ -70,7 +72,7 @@ public class CanvasUtilitys {
 				
 			
 			// Name of Tower
-			gc.setLineWidth(0.1);
+			gc.setLineWidth(0.5);
 			double towerTexX = newX - textCenterOffset;
 			double towerTextY = newY + textGap;
 			gc.strokeText("Tower " + towerIndex,towerTexX, towerTextY);
@@ -144,6 +146,7 @@ public class CanvasUtilitys {
 					hitboxStartY = newY;
 					hitboxEndY = newY + p.getPhysicalHeight();
 					p.getHitbox().setHitbox(hitBoxStartX, hitboxEndX, hitboxStartY, hitboxEndY);
+					p.getHitbox().setPointMatrix();
 					
 //					System.out.println("Plate: " + plateIndex + "\nMin X: " + p.getHitbox().getMinX()
 //							+ ", Max X: " + p.getHitbox().getMaxX() + "\nMin Y: " + p.getHitbox().getMinY()
@@ -166,13 +169,17 @@ public class CanvasUtilitys {
 		}
 	}
 	
-	public static void drawCountdown(GraphicsContext gc, double time){
-		
+	public static void drawCountdown(GraphicsContext gc, String time){
+		gc.clearRect(0, 0, gc.getCanvas().getWidth(), 60);
+		gc.strokeLine(550, 60, 700, 60);
+		gc.strokeLine(550, 0, 550, 60);
+		gc.strokeLine(700, 0, 700, 60);
+		gc.strokeText(time, 600, 40);
 	}
 	
 	public static void drawMouseSelect(GraphicsContext gc, double xStart, double xEnd, double yStart, double yEnd) {
 		gc.setFill(Color.BLACK);
-
+		gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
 		gc.strokeLine(xStart, yStart, xEnd, yStart);
 		gc.strokeLine(xEnd, yStart, xEnd, yEnd);
 		gc.strokeLine(xStart, yStart, xStart, yEnd);

@@ -1,5 +1,5 @@
 package logic.hanoi;
 
 public enum GameModes {
-		FREE, CHALLENGe
+		FREE, CHALLENGE, TIME, TRAINING
 }

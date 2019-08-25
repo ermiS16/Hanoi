@@ -8,6 +8,9 @@ import logic.hanoi.MoveHandler;
 import logic.hanoi.Plate;
 import logic.hanoi.Tower;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -23,20 +26,25 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
 import javafx.scene.canvas.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseDragEvent;
 
 /**
  * The GUI of the Application
@@ -49,13 +57,18 @@ public class Gui extends Application {
 
 	// Fix Attributes
 	private final double REL_WINDOW_SIZE_FACTOR = 0.7; // 70% of screen size
-
+	private static final long GAME_TIMER_EASY = (long) (90 * Math.pow(10, 3));
+	private static final long GAME_TIMER_MIDDLE =  (long) (60 * Math.pow(10, 3));
+	private static final long GAME_TIMER_HARD =  (long) (30 * Math.pow(10, 3));
+	private static final long GAME_TIMER_IMPOSSIBLE =  (long) (15 * Math.pow(10, 3));;
+	
 	// Setting Attributes
 	private Rectangle2D screenBounds;
 	private double windowWidth;
 	private double windowHeight;
 	private boolean sameSave;
 	private boolean sameExport;
+	private long sessionStartTime;
 
 	// Mouse Context Menu
 	private ContextMenu mouseContextMenu;
@@ -97,15 +110,23 @@ public class Gui extends Application {
 	private Separator separator1;
 	private Separator separator2;
 	private Separator separator3;
-	private Button newSessionOk;
-	private Button newSessionCancel;
+	private Separator seperator4;
+	private Separator seperator5;
 	private TextField varAmountTowers;
 	private Label labelAmountTowers;
 	private Label labelBitWidth;
 	private Label labelNumber;
 	private TextField varBitWidth;
 	private Label varNumber;
-	private Rectangle2D dragSelect;
+	private RadioButton gameModeFree;
+	private RadioButton gameModeChallenge;
+	private RadioButton gameModeTime;
+	private RadioButton gameModeTraining;
+	private Label gameModesLabel;
+	private ComboBox diffcultyLevel;
+	private Label difficultyLevelLabel;
+	private Button newSessionOk;
+	private Button newSessionCancel;
 
 	
 	//Tower relevated stuff
@@ -122,11 +143,13 @@ public class Gui extends Application {
 	// Necessary Stuff
 	private App app;
 	private MoveHandler moveHandler;
+	private boolean changeDetected;
 
 	//Gamemodestuff
 	private GameModes gameMode;
 	private DifficultyLevel difficulty;
-	private double gameTimer;
+	private long gameTimer;
+	private long timeCounter;
 	
 	
 	
@@ -143,6 +166,7 @@ public class Gui extends Application {
 
 		
 //		//For New Entry
+		
 		newSessionWindow = new GridPane();
 		varAmountTowers = new TextField();
 		varAmountTowers.setPromptText("max: "+MAX_AMOUNT_TOWERS);
@@ -211,9 +235,27 @@ public class Gui extends Application {
 		newSessionWindow.add(newSessionOk, 0, 7);
 		newSessionWindow.add(newSessionCancel, 1, 7);
 
+		gameModeFree = new RadioButton("Free");
+		gameModeChallenge = new RadioButton("Challenge");
+		gameModeTime = new RadioButton("Time");
+		gameModeTraining = new RadioButton("Training");
+		gameModesLabel = new Label("Game Mode:");
+		seperator4 = new Separator();
+		seperator4.setMinWidth(20);
+		seperator5 = new Separator();
+		seperator5.setMinHeight(5);
+		
+		newSessionWindow.add(seperator4, 3, 0);
+		newSessionWindow.add(seperator5, 4, 0);
+		
+		newSessionWindow.add(gameModesLabel, 4, 1);
+		newSessionWindow.add(gameModeFree, 4, 2);
+		newSessionWindow.add(gameModeChallenge, 4, 3);
+		newSessionWindow.add(gameModeTime, 4, 4);
+		newSessionWindow.add(gameModeTraining, 4, 5);
+		
 		// Mouse Context
 		mouseContextMenu = new ContextMenu();
-		dragSelect = new Rectangle2D(0, 0, 0, 0);
 
 		// Menu Items
 		quit = new MenuItem("exit");
@@ -275,10 +317,7 @@ public class Gui extends Application {
 		showTowerValue = true;
 		
 		moveHandler = new MoveHandler();
-		gameMode = GameModes.FREE;
-		difficulty = DifficultyLevel.MIDDLE;
-		gameTimer = 60;							//in seconds
-		
+		changeDetected = true;
 		setInitObjects(app);
 	}
 
@@ -310,6 +349,12 @@ public class Gui extends Application {
 				plateWidth -= widthScalingStep;
 			}
 		}
+		
+		gameMode = GameModes.FREE;
+		difficulty = DifficultyLevel.MIDDLE;
+		gameTimer = GAME_TIMER_EASY;	
+		sessionStartTime = System.currentTimeMillis();
+		timeCounter = gameTimer;
 	}
 	
 	public App restoreDate(App application) {
@@ -326,10 +371,14 @@ public class Gui extends Application {
 	}
 
 //-------------------Helper Methods--------------//
-
-
-
-
+	
+	private void setChangeDetected(boolean detected) {
+		this.changeDetected = detected;
+	}
+	
+	private boolean getChangeDetected() {
+		return this.changeDetected;
+	}
 	
 	private void setSaveDirectory(File file) {
 		this.saveDirectory = file;
@@ -359,17 +408,28 @@ public class Gui extends Application {
 		return this.showTowerValue;
 	}
 
+	private void setTimeConuter(long time) {
+		this.timeCounter = time;
+	}
 	
-	public DifficultyLevel getDifficulty() {
+	private long getTimeCounter() {
+		return this.timeCounter;
+	}
+	
+	private long getGameTimer() {
+		return this.gameTimer;
+	}
+	
+	private DifficultyLevel getDifficulty() {
 		return this.difficulty;
 	}
-	public void setDifficulty(DifficultyLevel level) {
+	private void setDifficulty(DifficultyLevel level) {
 		this.difficulty = level;
 	}
-	public GameModes getGameMode() {
+	private GameModes getGameMode() {
 		return this.gameMode;
 	}
-	public void setGameMode(GameModes mode) {
+	private void setGameMode(GameModes mode) {
 		this.gameMode = mode;
 	}
 	
@@ -390,14 +450,20 @@ public class Gui extends Application {
 		return max - 1;
 	}
 	
-
-	private void waitToCount() {
-		
+	private void setTimer() {
+	
+		long currentSessionTime = System.currentTimeMillis();
+		long diff = currentSessionTime - sessionStartTime;
+		timeCounter = gameTimer-diff;
+//		System.out.println(sessionStartTime + "     " + currentSessionTime + "      " + diff + "        " + timeCounter);
 	}
 	
-	private void timer() {
+	private String getTimerAsString() {
 		
+		String formattedDate = new SimpleDateFormat("mm:ss.SSS").format(timeCounter);		
+		return formattedDate;
 	}
+	
 	/**
 	 * Start for the GUI Interface for Useractivity
 	 */
@@ -406,11 +472,18 @@ public class Gui extends Application {
 
 		// Main Elements
 		GridPane root = new GridPane();
+		Pane canvasPane = new Pane();
 		Canvas showCase = new Canvas(windowWidth, windowHeight);
-		GraphicsContext gc = showCase.getGraphicsContext2D();
+		Canvas selectLayer = new Canvas(windowWidth, windowHeight);
+		canvasPane.getChildren().add(selectLayer);
+		canvasPane.getChildren().add(showCase);
+
+		GraphicsContext gcShowCase = showCase.getGraphicsContext2D();
+		GraphicsContext gcSelectLayer = selectLayer.getGraphicsContext2D();
 		
 		root.add(menu, 0, 0);
-		root.add(showCase, 0, 1);
+		root.add(canvasPane, 0, 1);
+//		root.add(showCase, 0, 1);
 
 		// Display of Bitlength Value in the newEntryWindow
 		bitWidth.valueProperty().addListener(new ChangeListener<Number>() {
@@ -430,6 +503,15 @@ public class Gui extends Application {
 				amountTowerValue.setText(String.format("%.0f", newValue));
 			}
 		});
+		
+		gameModeFree.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				
+			}
+		});
+		
+		
 		// Show mouse context menu on right click.
 		showCase.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
 			public void handle(ContextMenuEvent e) {
@@ -441,7 +523,7 @@ public class Gui extends Application {
 		reset.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+				gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 				app = new App(app.getAmountTowers(), app.getTowerHeight());
 				setInitObjects(app);
 			}
@@ -458,7 +540,8 @@ public class Gui extends Application {
 				newSessionOk.setOnAction(new EventHandler<ActionEvent>() {
 					@Override 
 					public void handle(ActionEvent e) {
-						gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+						setChangeDetected(true);
+						gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 
 						// Read Input
 						String amountTowersString = String.valueOf(amountTower.getValue());
@@ -559,7 +642,7 @@ public class Gui extends Application {
 					}
 					sameSave = false;
 					sameExport = false;
-					gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+					gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 					setInitObjects(app);
 				}
 			}
@@ -641,13 +724,14 @@ public class Gui extends Application {
 		//Handles the Mouseclicks on Plates an Towers.
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
+				setChangeDetected(true);
 				boolean moved = false;
 				Tower from = null;
-				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
-				gc.setFill(Color.BLACK);
+				gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+				gcShowCase.setFill(Color.BLACK);
 //				System.out.println("X: " + e.getX() + ", Y: " + e.getY());
 				//A small Oval for showing, where the user clicked on the canvas.
-				gc.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
+				gcShowCase.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
 				switch(getDifficulty()) {
 				case EASY: moveHandler.clickLogicEasy(towerSet, e.getX(), e.getY());
 							break;
@@ -663,6 +747,15 @@ public class Gui extends Application {
 			}
 		});
 
+		
+		
+		showCase.setOnDragDetected(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				System.out.println("Detected");
+				
+			}
+		});
+		
 		showCase.setOnMousePressed(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				moveHandler.setDragStartX(e.getX());
@@ -678,33 +771,52 @@ public class Gui extends Application {
 				moveHandler.setDragEndY(e.getY());
 				double width = moveHandler.getDragEndX() - moveHandler.getDragEndX();
 				double height = moveHandler.getDragStartY() - moveHandler.getDragEndY();
-				gc.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
-				CanvasUtilitys.drawMouseSelect(gc, moveHandler.getDragStartX(), moveHandler.getDragEndX(), 
+//				gcSelectLayer.clearRect(0, 0, selectLayer.getWidth(), selectLayer.getHeight());
+				switch(difficulty) {
+					case EASY: break;
+					case MIDDLE: break;
+					case HARD: break;
+					case IMPOSSIBLE: break;
+					default: break;
+				}
+				
+				CanvasUtilitys.drawMouseSelect(gcSelectLayer, moveHandler.getDragStartX(), moveHandler.getDragEndX(), 
 													moveHandler.getDragStartY(), moveHandler.getDragEndY());
+				
+				showCase.setOnMouseReleased(new EventHandler<MouseEvent>() {
+					public void handle(MouseEvent e) {
+						System.out.println("Mousedrag Exit");
+						gcSelectLayer.clearRect(0, 0, selectLayer.getWidth(), selectLayer.getHeight());
+//						moveHandler.getHitbox().setPointMatrix();
+						moveHandler.clickLogicSelectPlates(towerSet);
+					}
+				});
 			}
 		});
 		
-		showCase.setOnMouseReleased(new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-				System.out.println("Mousedrag Exit");
-			}
-		});
-		
-		double time = 0;
+
 		
 		//A Timer, that creates an "endless" loop
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-//				switch(gamemode) {
-//				case FREE: break;
-//				case CHALLENGE: break;
-//				}
-//				drawTower(gc, app.getTowerSet());
 				
-				CanvasUtilitys.drawTower(gc, app.getTowerSet().getTowers(), showTowerValue);
-				CanvasUtilitys.drawPlates(gc, app.getTowerSet().getTowers(), showPlateValue);
-				CanvasUtilitys.drawCountdown(gc, time);
+				switch(gameMode) {
+				case FREE: break;
+				case CHALLENGE: break;
+				case TIME: break;
+				case TRAINING: break;
+				}
+				
+				if(getChangeDetected()) {
+					setChangeDetected(false);
+					CanvasUtilitys.drawTower(gcShowCase, app.getTowerSet().getTowers(), showTowerValue);
+					CanvasUtilitys.drawPlates(gcShowCase, app.getTowerSet().getTowers(), showPlateValue);			
+				}
+				if(timeCounter > 0) {
+					setTimer();
+					CanvasUtilitys.drawCountdown(gcShowCase, getTimerAsString());					
+				}
 			}
 		}.start();
 

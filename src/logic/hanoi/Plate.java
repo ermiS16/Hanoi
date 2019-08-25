@@ -1,6 +1,9 @@
 package logic.hanoi;
 
+import java.awt.Point;
+
 import gui.Hitbox;
+import javafx.geometry.Point2D;
 
 /**
  * Represents a single plate that can be on a tower.
@@ -20,6 +23,7 @@ public class Plate implements Comparable<Object>{
 	private Hitbox hitbox;
 	private double physicalWidth;
 	private double physicalHeight;
+	private Point2D[][] pointMatrixPlate;
 	
 	/**
 	 * Creates a new plate.
@@ -31,6 +35,7 @@ public class Plate implements Comparable<Object>{
 		this.hitbox = new Hitbox();
 		this.physicalWidth = 0;
 		this.physicalHeight = 0;
+		this.pointMatrixPlate = new Point2D[0][0];
 	}
 		
 	public static double getMinWidth() {
