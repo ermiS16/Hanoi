@@ -351,7 +351,7 @@ public class Gui extends Application {
 		}
 		
 		gameMode = GameModes.FREE;
-		difficulty = DifficultyLevel.MIDDLE;
+		difficulty = DifficultyLevel.HARD;
 		gameTimer = GAME_TIMER_EASY;	
 		sessionStartTime = System.currentTimeMillis();
 		timeCounter = gameTimer;
@@ -719,11 +719,12 @@ public class Gui extends Application {
 			}
 		});
 		
-		
+
 		
 		//Handles the Mouseclicks on Plates an Towers.
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
+				
 				setChangeDetected(true);
 				boolean moved = false;
 				Tower from = null;
@@ -734,7 +735,7 @@ public class Gui extends Application {
 				gcShowCase.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
 				switch(getDifficulty()) {
 				case EASY: moveHandler.clickLogicEasy(towerSet, e.getX(), e.getY());
-							break;
+				break;
 				case MIDDLE: moveHandler.clickLogicMiddle(towerSet, e.getX(), e.getY());
 							break;
 				case HARD : moveHandler.clickLogicHard(towerSet, e.getX(), e.getY());
@@ -749,14 +750,13 @@ public class Gui extends Application {
 
 		
 		
-		showCase.setOnDragDetected(new EventHandler<MouseEvent>() {
+		selectLayer.setOnDragDetected(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				System.out.println("Detected");
-				
 			}
 		});
 		
-		showCase.setOnMousePressed(new EventHandler<MouseEvent>() {
+		selectLayer.setOnMousePressed(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				moveHandler.setDragStartX(e.getX());
 				moveHandler.setDragStartY(e.getY());
@@ -764,14 +764,15 @@ public class Gui extends Application {
 			}
 		});
 		
-		showCase.setOnMouseDragged(new EventHandler<MouseEvent>() {
+		
+		selectLayer.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
 				
 				moveHandler.setDragEndX(e.getX());
 				moveHandler.setDragEndY(e.getY());
 				double width = moveHandler.getDragEndX() - moveHandler.getDragEndX();
 				double height = moveHandler.getDragStartY() - moveHandler.getDragEndY();
-//				gcSelectLayer.clearRect(0, 0, selectLayer.getWidth(), selectLayer.getHeight());
+
 				switch(difficulty) {
 					case EASY: break;
 					case MIDDLE: break;
@@ -783,11 +784,11 @@ public class Gui extends Application {
 				CanvasUtilitys.drawMouseSelect(gcSelectLayer, moveHandler.getDragStartX(), moveHandler.getDragEndX(), 
 													moveHandler.getDragStartY(), moveHandler.getDragEndY());
 				
-				showCase.setOnMouseReleased(new EventHandler<MouseEvent>() {
+				selectLayer.setOnMouseReleased(new EventHandler<MouseEvent>() {
 					public void handle(MouseEvent e) {
+						setChangeDetected(true);
 						System.out.println("Mousedrag Exit");
 						gcSelectLayer.clearRect(0, 0, selectLayer.getWidth(), selectLayer.getHeight());
-//						moveHandler.getHitbox().setPointMatrix();
 						moveHandler.clickLogicSelectPlates(towerSet);
 					}
 				});

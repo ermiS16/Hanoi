@@ -2,6 +2,7 @@ package logic.hanoi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.RecursiveTask;
 
 import com.sun.javafx.geom.Rectangle;
 
@@ -222,7 +223,7 @@ public class MoveHandler {
 		this.getHitbox().setHitbox(this.getDragStartX(), this.getDragEndX(), this.getDragStartY(), this.getDragEndY());
 	}
 	 
-	public void towerClicked(Tower tower, double clickX, double clickY) {
+	public void towerClicked(Tower tower, double clickX, double clickY, DifficultyLevel difficulty) {
 		Tower from = null;
 		boolean moved = false;
 			
@@ -239,12 +240,14 @@ public class MoveHandler {
 						//Reset the hitbox of the both involved towers
 						//and reset the Plates that must be moved to zero.
 						resetAmountPlatesHit();
+						if(plateSelected()) setPlateSelected(false);
 						tower.getHitbox().setHit(false);
 						from.getHitbox().setHit(false);
 						resetPlatesFrom();
 					} else {
 						
 						//When the Plates are not moved, then t is no longer a available destination.
+						if(plateSelected()) setPlateSelected(false);
 						tower.getHitbox().setHit(false);
 					}
 				} catch (NullPointerException exception) {
@@ -334,7 +337,7 @@ public class MoveHandler {
 				} // if
 			} // if
 			
-			towerClicked(t, clickX, clickY);
+			towerClicked(t, clickX, clickY, DifficultyLevel.MIDDLE);
 //			//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
 //			//Plates are selected.
 //			if (hitMatch(t.getHitbox(), clickX, clickY)) {
@@ -398,7 +401,7 @@ public class MoveHandler {
 				} // for
 			} //if
 			
-			towerClicked(t, clickX, clickY);
+			towerClicked(t, clickX, clickY, DifficultyLevel.HARD);
 //			if(hitMatch(t.getHitbox(), clickX, clickY)) {
 //				if(!t.getHitbox().isHit() && plateSelected()) {
 //					t.getHitbox().setHit(true);

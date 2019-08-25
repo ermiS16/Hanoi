@@ -77,8 +77,6 @@ public class Hitbox {
 				box.getMinY()+box.getHeight() > this.getMinY() + hitboxHalfHeight) {
 			consistent = true;
 		}
-	
-		
 		return consistent;
 	}
 	
