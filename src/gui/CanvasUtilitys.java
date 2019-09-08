@@ -8,6 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.FillRule;
 import logic.hanoi.Plate;
+import logic.hanoi.Timer;
 import logic.hanoi.Tower;
 
 public class CanvasUtilitys {
@@ -73,6 +74,7 @@ public class CanvasUtilitys {
 			
 			// Name of Tower
 			gc.setLineWidth(0.5);
+			gc.setStroke(Color.BLACK);
 			double towerTexX = newX - textCenterOffset;
 			double towerTextY = newY + textGap;
 			gc.strokeText("Tower " + towerIndex,towerTexX, towerTextY);
@@ -155,7 +157,7 @@ public class CanvasUtilitys {
 					//Show Value "on" Plate
 					if(showPlateValue) {
 						gc.setLineWidth(0.5);
-						gc.setFill(Color.BLACK);
+						gc.setStroke(Color.BLACK);
 						valueTextX = newX + (p.getPhysicalWidth()/2) ;
 						valueTextY = newY+valueTextOffsetY;
 						gc.strokeText(""+p.getValue(), valueTextX, valueTextY);
@@ -169,17 +171,24 @@ public class CanvasUtilitys {
 		}
 	}
 	
-	public static void drawCountdown(GraphicsContext gc, String time){
+	public static void drawCountdown(GraphicsContext gc, long time){
 		gc.clearRect(0, 0, gc.getCanvas().getWidth(), 60);
+		
+		String formattedDate = new SimpleDateFormat("mm:ss.SSS").format(time);	
+		
+		gc.setStroke(Color.BLACK);
 		gc.strokeLine(550, 60, 700, 60);
 		gc.strokeLine(550, 0, 550, 60);
 		gc.strokeLine(700, 0, 700, 60);
-		gc.strokeText(time, 600, 40);
+		
+		if(time <= Timer.getGameTimeAlert())	gc.setStroke(Color.RED);
+		gc.strokeText(formattedDate, 600, 40);
 	}
 	
 	public static void drawMouseSelect(GraphicsContext gc, double xStart, double xEnd, double yStart, double yEnd) {
 		gc.setFill(Color.BLACK);
 		gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+		
 		gc.strokeLine(xStart, yStart, xEnd, yStart);
 		gc.strokeLine(xEnd, yStart, xEnd, yEnd);
 		gc.strokeLine(xStart, yStart, xStart, yEnd);

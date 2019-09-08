@@ -13,26 +13,47 @@ import javafx.application.*;
 
 public class App{
 	
+	private static final GameModes STANDARD_GAMEMODE = GameModes.FREE;
+	private static final DifficultyLevel STANDARD_DIFFICULTY = DifficultyLevel.MIDDLE;
+	private static final long GAME_TIMER_START = Timer.getGameTimerMiddle();
+	
 	private TowerSet towerSet;
 	private int amountTowers;
 	private int towerHeight;
+	private GameModes gameMode;
+	private DifficultyLevel difficulty;
+	private long gameTime;
 
 	public App() {
 		this.towerSet = new TowerSet();
 		this.amountTowers = TowerSet.getDefaultAmount();
 		this.towerHeight = TowerSet.getDefaultHeight();
+		this.gameMode = STANDARD_GAMEMODE;
+		this.difficulty = STANDARD_DIFFICULTY;
+		this.gameTime = GAME_TIMER_START;
 	}
 
-	public App(int amountTowers, int towerHeight) {
+	public App(int amountTowers, int towerHeight, GameModes gm, DifficultyLevel di, long gt) {
 		this.amountTowers = amountTowers;
 		this.towerHeight = towerHeight;
 		this.towerSet = new TowerSet(amountTowers, towerHeight);
+		this.gameMode = gm;
+		this.difficulty = di;
+		this.gameTime = gt;
+		
 	}
 	
-	public App(int amountTowers, int towerHeight, TowerSet towerSet) {
+	public App(int amountTowers, int towerHeight, TowerSet towerSet, GameModes gm, DifficultyLevel di, long gt) {
 		this.amountTowers = amountTowers;
 		this.towerHeight = towerHeight;
 		this.towerSet = towerSet;
+		this.gameMode = gm;
+		this.difficulty = di;
+		this.gameTime = gt;
+	}
+	
+	public long getTimer() {
+		return this.gameTime;
 	}
 	
 	public int getAmountTowers() {
@@ -44,6 +65,14 @@ public class App{
 	
 	public TowerSet getTowerSet() {
 		return this.towerSet;
+	}
+	
+	public GameModes getGameMode() {
+		return this.gameMode;
+	}
+	
+	public DifficultyLevel getDifficulty() {
+		return this.difficulty;
 	}
 	
 	public static void main(String args[]) {

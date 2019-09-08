@@ -223,12 +223,14 @@ public class MoveHandler {
 		this.getHitbox().setHitbox(this.getDragStartX(), this.getDragEndX(), this.getDragStartY(), this.getDragEndY());
 	}
 	 
-	public void towerClicked(Tower tower, double clickX, double clickY, DifficultyLevel difficulty) {
+	public void towerClicked(Tower tower, double clickX, double clickY, boolean condition, DifficultyLevel difficulty) {
 		Tower from = null;
 		boolean moved = false;
 			
+		if(difficulty.equals(DifficultyLevel.HARD)) condition = !condition;
+		
 		if (hitMatch(tower.getHitbox(), clickX, clickY)) {
-			if (!tower.getHitbox().isHit() && getAmountPlatesHit() != 0) {
+			if (!tower.getHitbox().isHit() && condition) {
 				tower.getHitbox().setHit(true);
 				from = getPlatesFrom();
 				
@@ -305,39 +307,39 @@ public class MoveHandler {
 	 * @param clickX
 	 * @param clickY
 	 */
-	public void clickLogicMiddle(Tower[] towerSet, double clickX, double clickY) {
-		boolean moved = false;
-		Tower from = null;
-		
-		for (Tower t : towerSet) {
-			if (!t.getPlates().isEmpty()) {
-				
-				//Plates can only be "clicked" if their are on a Tower, where another one is already clicked or
-				//no Tower is selected at that moment.
-				if (t == getPlatesFrom() || getPlatesFrom() == null) {
-					for (Plate p : t.getPlates()) {
-						// Checks if Hitbox of a Plate is hit
-						if (hitMatch(p.getHitbox(), clickX, clickY)) {
-							// Checks if Plates already Hit
-							if (!p.getHitbox().isHit()) {
-								// Saves Tower, from which Plate shall be moved.
-								platesFrom(t);
-								// Set Hit for Hitbox on true
-								p.getHitbox().setHit(true);
-								increaseAmountPlatesHit();
-								addPlateToMove(p);
-							} else {
-								p.getHitbox().setHit(false);
-								decreaseAmountPlatesHit();
-								removePlateToMove(p);
-								if (getPlateToMove().isEmpty()) platesFrom(null);
-							} // else
-						} // if
-					} // fpr
-				} // if
-			} // if
+//	public void clickLogicMiddle(Tower[] towerSet, double clickX, double clickY) {
+//		boolean moved = false;
+//		Tower from = null;
+//		
+//		for (Tower t : towerSet) {
+//			if (!t.getPlates().isEmpty()) {
+//				
+//				//Plates can only be "clicked" if their are on a Tower, where another one is already clicked or
+//				//no Tower is selected at that moment.
+//				if (t == getPlatesFrom() || getPlatesFrom() == null) {
+//					for (Plate p : t.getPlates()) {
+//						// Checks if Hitbox of a Plate is hit
+//						if (hitMatch(p.getHitbox(), clickX, clickY)) {
+//							// Checks if Plates already Hit
+//							if (!p.getHitbox().isHit()) {
+//								// Saves Tower, from which Plate shall be moved.
+//								platesFrom(t);
+//								// Set Hit for Hitbox on true
+//								p.getHitbox().setHit(true);
+//								increaseAmountPlatesHit();
+//								addPlateToMove(p);
+//							} else {
+//								p.getHitbox().setHit(false);
+//								decreaseAmountPlatesHit();
+//								removePlateToMove(p);
+//								if (getPlateToMove().isEmpty()) platesFrom(null);
+//							} // else
+//						} // if
+//					} // fpr
+//				} // if
+//			} // if
 			
-			towerClicked(t, clickX, clickY, DifficultyLevel.MIDDLE);
+//			towerClicked(t, clickX, clickY, DifficultyLevel.MIDDLE);
 //			//If a clicked Tower wasn't hit before, it will be the destination for the Plates, when
 //			//Plates are selected.
 //			if (hitMatch(t.getHitbox(), clickX, clickY)) {
@@ -368,9 +370,15 @@ public class MoveHandler {
 //				//because it would be the source of plates then.
 //				} else	t.getHitbox().setHit(false);
 //			}
-		}
-	}
+//		}
+//	}
 
+	private boolean getRightCondition(DifficultyLevel difficulty) {
+		boolean condition = true;
+		
+		if(difficulty.equals(DifficultyLevel.HARD)) return (condition = !plateSelected);
+		else return condition;
+	}
 	
 	/**
 	 * Hard Logic for the Movement of Plate. Only the Plate on the Top is movable.
@@ -378,30 +386,40 @@ public class MoveHandler {
 	 * @param clickX Point on x-Axis
 	 * @param clickY Point on y-Axis
 	 */
-	public void clickLogicHard(Tower[] towerSet, double clickX, double clickY) {
+	public void clickLogicHard(Tower[] towerSet, double clickX, double clickY, DifficultyLevel difficulty) {
 		boolean moved = false;
 		Tower from = null;
+		boolean condition = false;
+		
+		if(difficulty.equals(DifficultyLevel.HARD)) condition = !plateSelected;
+		else if(difficulty.equals(DifficultyLevel.MIDDLE)) 	condition = (amountPlatesHit != 0);
+		
 		
 		for(Tower t : towerSet) {
-			if(!t.getPlates().isEmpty() && !plateSelected()) {
+
+			if(!t.getPlates().isEmpty() && getRightCondition(difficulty)) {
 				for(Plate p : t.getPlates()) {
 					if(hitMatch(p.getHitbox(), clickX, clickY)) {
 						if(!p.getHitbox().isHit()) {
 							platesFrom(t);
 							p.getHitbox().setHit(true);
-							setPlateSelected(true);
+							if(difficulty.equals(DifficultyLevel.MIDDLE)) increaseAmountPlatesHit();
+							if(difficulty.equals(DifficultyLevel.HARD)) setPlateSelected(true);
 							addPlateToMove(p);
 						}else {
 							p.getHitbox().setHit(false);
+							if(difficulty.equals(DifficultyLevel.MIDDLE)) decreaseAmountPlatesHit();
+							if(difficulty.equals(DifficultyLevel.HARD)) setPlateSelected(false);
 							removePlateToMove(p);
-							setPlateSelected(false);
-							if(getPlateToMove().isEmpty()) from=null;
+							if(getPlateToMove().isEmpty()) platesFrom(null);
 						} // else
 					} // if
 				} // for
-			} //if
+			} else {
+				
+			}
 			
-			towerClicked(t, clickX, clickY, DifficultyLevel.HARD);
+			towerClicked(t, clickX, clickY, condition, difficulty);
 //			if(hitMatch(t.getHitbox(), clickX, clickY)) {
 //				if(!t.getHitbox().isHit() && plateSelected()) {
 //					t.getHitbox().setHit(true);

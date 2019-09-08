@@ -151,7 +151,7 @@ public class MenuFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new App(amountTower, bitlength, towerSet);		
+		return new App(amountTower, bitlength, towerSet, application.getGameMode(), application.getDifficulty(), application.getTimer());		
 	}	
 
 	

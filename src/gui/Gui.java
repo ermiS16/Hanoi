@@ -6,6 +6,7 @@ import logic.hanoi.DifficultyLevel;
 import logic.hanoi.GameModes;
 import logic.hanoi.MoveHandler;
 import logic.hanoi.Plate;
+import logic.hanoi.Timer;
 import logic.hanoi.Tower;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -16,6 +17,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -57,10 +59,7 @@ public class Gui extends Application {
 
 	// Fix Attributes
 	private final double REL_WINDOW_SIZE_FACTOR = 0.7; // 70% of screen size
-	private static final long GAME_TIMER_EASY = (long) (90 * Math.pow(10, 3));
-	private static final long GAME_TIMER_MIDDLE =  (long) (60 * Math.pow(10, 3));
-	private static final long GAME_TIMER_HARD =  (long) (30 * Math.pow(10, 3));
-	private static final long GAME_TIMER_IMPOSSIBLE =  (long) (15 * Math.pow(10, 3));;
+
 	
 	// Setting Attributes
 	private Rectangle2D screenBounds;
@@ -118,12 +117,15 @@ public class Gui extends Application {
 	private Label labelNumber;
 	private TextField varBitWidth;
 	private Label varNumber;
-	private RadioButton gameModeFree;
-	private RadioButton gameModeChallenge;
-	private RadioButton gameModeTime;
-	private RadioButton gameModeTraining;
+//	private RadioButton gameModeFree;
+//	private RadioButton gameModeChallenge;
+//	private RadioButton gameModeTime;
+//	private RadioButton gameModeTraining;
+	
+	private ComboBox<GameModes> gameModes;
 	private Label gameModesLabel;
-	private ComboBox diffcultyLevel;
+	
+	private ComboBox<DifficultyLevel> difficultyLevel;
 	private Label difficultyLevelLabel;
 	private Button newSessionOk;
 	private Button newSessionCancel;
@@ -144,13 +146,16 @@ public class Gui extends Application {
 	private App app;
 	private MoveHandler moveHandler;
 	private boolean changeDetected;
-
+	private boolean isDragged;
+	
 	//Gamemodestuff
+	private static final GameModes STANDARD_GAME_MODE = GameModes.FREE;
 	private GameModes gameMode;
 	private DifficultyLevel difficulty;
 	private long gameTimer;
 	private long timeCounter;
-	
+	private Timer timer;
+	private boolean gameActive;
 	
 	
 	/**
@@ -235,11 +240,16 @@ public class Gui extends Application {
 		newSessionWindow.add(newSessionOk, 0, 7);
 		newSessionWindow.add(newSessionCancel, 1, 7);
 
-		gameModeFree = new RadioButton("Free");
-		gameModeChallenge = new RadioButton("Challenge");
-		gameModeTime = new RadioButton("Time");
-		gameModeTraining = new RadioButton("Training");
+		gameModes = new ComboBox<GameModes>(FXCollections.observableArrayList(GameModes.FREE, GameModes.CHALLENGE, 
+																				GameModes.TIME, GameModes.TRAINING));
+		gameModes.setValue(gameModes.getItems().get(0));
 		gameModesLabel = new Label("Game Mode:");
+		
+		difficultyLevel = new ComboBox<DifficultyLevel>(FXCollections.observableArrayList(DifficultyLevel.EASY, DifficultyLevel.MIDDLE,
+																						DifficultyLevel.HARD, DifficultyLevel.IMPOSSIBLE));
+		difficultyLevel.setValue(difficultyLevel.getItems().get(1));
+		difficultyLevelLabel = new Label("Difficulty: ");
+		
 		seperator4 = new Separator();
 		seperator4.setMinWidth(20);
 		seperator5 = new Separator();
@@ -249,10 +259,14 @@ public class Gui extends Application {
 		newSessionWindow.add(seperator5, 4, 0);
 		
 		newSessionWindow.add(gameModesLabel, 4, 1);
-		newSessionWindow.add(gameModeFree, 4, 2);
-		newSessionWindow.add(gameModeChallenge, 4, 3);
-		newSessionWindow.add(gameModeTime, 4, 4);
-		newSessionWindow.add(gameModeTraining, 4, 5);
+		newSessionWindow.add(gameModes, 4, 2);
+		
+		newSessionWindow.add(difficultyLevelLabel, 4, 3);
+		newSessionWindow.add(difficultyLevel, 4, 4);
+		//		newSessionWindow.add(gameModeFree, 4, 2);
+//		newSessionWindow.add(gameModeChallenge, 4, 3);
+//		newSessionWindow.add(gameModeTime, 4, 4);
+//		newSessionWindow.add(gameModeTraining, 4, 5);
 		
 		// Mouse Context
 		mouseContextMenu = new ContextMenu();
@@ -318,6 +332,7 @@ public class Gui extends Application {
 		
 		moveHandler = new MoveHandler();
 		changeDetected = true;
+		isDragged = false;
 		setInitObjects(app);
 	}
 
@@ -350,11 +365,13 @@ public class Gui extends Application {
 			}
 		}
 		
-		gameMode = GameModes.FREE;
-		difficulty = DifficultyLevel.HARD;
-		gameTimer = GAME_TIMER_EASY;	
-		sessionStartTime = System.currentTimeMillis();
-		timeCounter = gameTimer;
+		gameMode = app.getGameMode();
+		difficulty = app.getDifficulty();
+		gameTimer = app.getTimer();	
+//		sessionStartTime = System.currentTimeMillis();
+//		timeCounter = gameTimer;
+		timer = new Timer(app.getTimer());
+		gameActive = true;
 	}
 	
 	public App restoreDate(App application) {
@@ -371,6 +388,23 @@ public class Gui extends Application {
 	}
 
 //-------------------Helper Methods--------------//
+	
+	
+	private boolean isGameActive() {
+		return this.gameActive;
+	}
+	
+	private void setGameActive(boolean active) {
+		this.gameActive = active;
+	}
+	
+//	private void setMouseDragged(boolean dragged) {
+//		this.isDragged = dragged;
+//	}
+	
+	private boolean isMouseDragged() {
+		return this.isDragged;
+	}
 	
 	private void setChangeDetected(boolean detected) {
 		this.changeDetected = detected;
@@ -397,42 +431,42 @@ public class Gui extends Application {
 	private void setShowPlateValue(boolean show) {
 		this.showPlateValue = show;
 	}
-	private boolean getShowPlateValue() {
-		return this.showPlateValue;
-	}
+//	private boolean getShowPlateValue() {
+//		return this.showPlateValue;
+//	}
 	
 	private void setShowTowerValue(boolean show) {
 		this.showTowerValue = show;
 	}
-	private boolean getShowTowerValue() {
-		return this.showTowerValue;
-	}
-
-	private void setTimeConuter(long time) {
-		this.timeCounter = time;
-	}
-	
-	private long getTimeCounter() {
-		return this.timeCounter;
-	}
-	
-	private long getGameTimer() {
-		return this.gameTimer;
-	}
-	
-	private DifficultyLevel getDifficulty() {
-		return this.difficulty;
-	}
-	private void setDifficulty(DifficultyLevel level) {
-		this.difficulty = level;
-	}
-	private GameModes getGameMode() {
-		return this.gameMode;
-	}
-	private void setGameMode(GameModes mode) {
-		this.gameMode = mode;
-	}
-	
+//	private boolean getShowTowerValue() {
+//		return this.showTowerValue;
+//	}
+//
+//	private void setTimeConuter(long time) {
+//		this.timeCounter = time;
+//	}
+//	
+//	private long getTimeCounter() {
+//		return this.timeCounter;
+//	}
+//	
+//	private long getGameTimer() {
+//		return this.gameTimer;
+//	}
+//	
+//	private DifficultyLevel getDifficulty() {
+//		return this.difficulty;
+//	}
+//	private void setDifficulty(DifficultyLevel level) {
+//		this.difficulty = level;
+//	}
+//	private GameModes getGameMode() {
+//		return this.gameMode;
+//	}
+//	private void setGameMode(GameModes mode) {
+//		this.gameMode = mode;
+//	}
+//	
 	
 //----------------------------------------------------//
 
@@ -450,19 +484,7 @@ public class Gui extends Application {
 		return max - 1;
 	}
 	
-	private void setTimer() {
-	
-		long currentSessionTime = System.currentTimeMillis();
-		long diff = currentSessionTime - sessionStartTime;
-		timeCounter = gameTimer-diff;
-//		System.out.println(sessionStartTime + "     " + currentSessionTime + "      " + diff + "        " + timeCounter);
-	}
-	
-	private String getTimerAsString() {
-		
-		String formattedDate = new SimpleDateFormat("mm:ss.SSS").format(timeCounter);		
-		return formattedDate;
-	}
+
 	
 	/**
 	 * Start for the GUI Interface for Useractivity
@@ -504,12 +526,12 @@ public class Gui extends Application {
 			}
 		});
 		
-		gameModeFree.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				
-			}
-		});
+//		gameModeFree.setOnAction(new EventHandler<ActionEvent>() {
+//			@Override
+//			public void handle(ActionEvent e) {
+//				
+//			}
+//		});
 		
 		
 		// Show mouse context menu on right click.
@@ -524,7 +546,7 @@ public class Gui extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
-				app = new App(app.getAmountTowers(), app.getTowerHeight());
+				app = new App(app.getAmountTowers(), app.getTowerHeight(), app.getGameMode(), app.getDifficulty(), app.getTimer());
 				setInitObjects(app);
 			}
 		});
@@ -540,21 +562,32 @@ public class Gui extends Application {
 				newSessionOk.setOnAction(new EventHandler<ActionEvent>() {
 					@Override 
 					public void handle(ActionEvent e) {
+						long timer = 0;
 						setChangeDetected(true);
 						gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
 
 						// Read Input
 						String amountTowersString = String.valueOf(amountTower.getValue());
 						String bitWidthString = String.valueOf(bitWidth.getValue());
-
+						GameModes gameMode = gameModes.getValue();
+						DifficultyLevel difficulty = difficultyLevel.getValue();
+						switch(difficulty) {
+						case EASY: timer=Timer.getGameTimerEasy(); break;
+						case MIDDLE: timer=Timer.getGameTimerMiddle(); break;
+						case HARD: timer=Timer.getGameTimerHard(); break;
+						case IMPOSSIBLE: timer=Timer.getGameTimerImpossible(); break;
+						default: timer=Timer.getGameTimerMiddle(); break;
+						}
+						
 						// Checks if Input is a Integer.
 						try {
 							// Parse Input into real Numbers if possible
 							int amountTowers = (int) Double.parseDouble(amountTowersString);
 							int newBitWidth = (int) Double.parseDouble(bitWidthString);
 
+							
 							// Creating a new App and initializie it
-							app = new App(amountTowers, newBitWidth);
+							app = new App(amountTowers, newBitWidth, gameMode, difficulty, timer);
 							setInitObjects(app);
 							newWindow.close();
 							sameSave = false;
@@ -577,6 +610,9 @@ public class Gui extends Application {
 				newSessionCancel.setOnAction(new EventHandler<ActionEvent>() {
 					@Override 
 					public void handle(ActionEvent ev) {
+						amountTower.setValue(MIN_AMOUNT_TOWERS);
+						bitWidth.setValue(MIN_BITWIDTH);
+						gameModes.setValue(STANDARD_GAME_MODE);
 						newWindow.close();
 					}
 				});
@@ -724,76 +760,83 @@ public class Gui extends Application {
 		//Handles the Mouseclicks on Plates an Towers.
 		showCase.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
-				
-				setChangeDetected(true);
-				boolean moved = false;
-				Tower from = null;
-				gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
-				gcShowCase.setFill(Color.BLACK);
+				if(!isMouseDragged()) {
+					
+				if (isGameActive()){
+					setChangeDetected(true);
+					boolean moved = false;
+					Tower from = null;
+					gcShowCase.clearRect(0, 0, showCase.getWidth(), showCase.getHeight());
+					gcShowCase.setFill(Color.BLACK);
+//					System.out.println("X: " + e.getX() + ", Y: " + e.getY());
+					//A small Oval for showing, where the user clicked on the canvas.
+					gcShowCase.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
+					moveHandler.clickLogicHard(towerSet, e.getX(), e.getY(), app.getDifficulty());
+				}
+
+//				switch(getDifficulty()) {
+//				case EASY: moveHandler.clickLogicEasy(towerSet, e.getX(), e.getY());
+//				break;
+//				case MIDDLE: moveHandler.clickLogicMiddle(towerSet, e.getX(), e.getY());
+//							break;
+//				case HARD : moveHandler.clickLogicHard(towerSet, e.getX(), e.getY());
+//							break;
+//				case IMPOSSIBLE: break;
+//				default: break;
+//				}
+
+				}
+			}
+		});
+
+		
+		
+//		selectLayer.setOnDragDetected(new EventHandler<MouseEvent>() {
+//			public void handle(MouseEvent e) {
+//				System.out.println("Detected");
+//				setMouseDragged(true);
+//			}
+//		});
+//		
+//		showCase.setOnMousePressed(new EventHandler<MouseEvent>() {
+//			public void handle(MouseEvent e) {
+//				moveHandler.setDragStartX(e.getX());
+//				moveHandler.setDragStartY(e.getY());
 //				System.out.println("X: " + e.getX() + ", Y: " + e.getY());
-				//A small Oval for showing, where the user clicked on the canvas.
-				gcShowCase.fillOval(e.getX() - 5, e.getY() - 5, 10, 10);
-				switch(getDifficulty()) {
-				case EASY: moveHandler.clickLogicEasy(towerSet, e.getX(), e.getY());
-				break;
-				case MIDDLE: moveHandler.clickLogicMiddle(towerSet, e.getX(), e.getY());
-							break;
-				case HARD : moveHandler.clickLogicHard(towerSet, e.getX(), e.getY());
-							break;
-				case IMPOSSIBLE: break;
-				default: break;
-				}
-
-				
-			}
-		});
-
-		
-		
-		selectLayer.setOnDragDetected(new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-				System.out.println("Detected");
-			}
-		});
-		
-		selectLayer.setOnMousePressed(new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-				moveHandler.setDragStartX(e.getX());
-				moveHandler.setDragStartY(e.getY());
-				System.out.println("X: " + e.getX() + ", Y: " + e.getY());	
-			}
-		});
-		
-		
-		selectLayer.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-				
-				moveHandler.setDragEndX(e.getX());
-				moveHandler.setDragEndY(e.getY());
-				double width = moveHandler.getDragEndX() - moveHandler.getDragEndX();
-				double height = moveHandler.getDragStartY() - moveHandler.getDragEndY();
-
-				switch(difficulty) {
-					case EASY: break;
-					case MIDDLE: break;
-					case HARD: break;
-					case IMPOSSIBLE: break;
-					default: break;
-				}
-				
-				CanvasUtilitys.drawMouseSelect(gcSelectLayer, moveHandler.getDragStartX(), moveHandler.getDragEndX(), 
-													moveHandler.getDragStartY(), moveHandler.getDragEndY());
-				
-				selectLayer.setOnMouseReleased(new EventHandler<MouseEvent>() {
-					public void handle(MouseEvent e) {
-						setChangeDetected(true);
-						System.out.println("Mousedrag Exit");
-						gcSelectLayer.clearRect(0, 0, selectLayer.getWidth(), selectLayer.getHeight());
-						moveHandler.clickLogicSelectPlates(towerSet);
-					}
-				});
-			}
-		});
+//				setMouseDragged(false);
+//			}
+//		});
+//		
+//		
+//		showCase.setOnMouseDragged(new EventHandler<MouseEvent>() {
+//			public void handle(MouseEvent e) {
+//				
+//				moveHandler.setDragEndX(e.getX());
+//				moveHandler.setDragEndY(e.getY());
+//				double width = moveHandler.getDragEndX() - moveHandler.getDragEndX();
+//				double height = moveHandler.getDragStartY() - moveHandler.getDragEndY();
+//
+//				switch(difficulty) {
+//					case EASY: break;
+//					case MIDDLE: break;
+//					case HARD: break;
+//					case IMPOSSIBLE: break;
+//					default: break;
+//				}
+//				
+//				CanvasUtilitys.drawMouseSelect(gcSelectLayer, moveHandler.getDragStartX(), moveHandler.getDragEndX(), 
+//													moveHandler.getDragStartY(), moveHandler.getDragEndY());
+//				
+//				showCase.setOnMouseReleased(new EventHandler<MouseEvent>() {
+//					public void handle(MouseEvent e) {
+//						setChangeDetected(true);
+//						System.out.println("Mousedrag Exit");
+//						gcSelectLayer.clearRect(0, 0, selectLayer.getWidth(), selectLayer.getHeight());
+//						moveHandler.clickLogicSelectPlates(towerSet);
+//					}
+//				});
+//			}
+//		});
 		
 
 		
@@ -801,6 +844,7 @@ public class Gui extends Application {
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
+				
 				
 				switch(gameMode) {
 				case FREE: break;
@@ -814,9 +858,17 @@ public class Gui extends Application {
 					CanvasUtilitys.drawTower(gcShowCase, app.getTowerSet().getTowers(), showTowerValue);
 					CanvasUtilitys.drawPlates(gcShowCase, app.getTowerSet().getTowers(), showPlateValue);			
 				}
-				if(timeCounter > 0) {
-					setTimer();
-					CanvasUtilitys.drawCountdown(gcShowCase, getTimerAsString());					
+				long timeCounter = timer.getTime();
+				if(gameMode.equals(GameModes.CHALLENGE) || gameMode.equals(GameModes.TIME)) {
+					if(timeCounter > 0) {
+						timer.setTimer();
+						CanvasUtilitys.drawCountdown(gcShowCase, timeCounter);
+					}else {
+						setGameActive(false);
+						timer.setTimeCounter(0);
+						CanvasUtilitys.drawCountdown(gcShowCase, timeCounter);
+					}
+					
 				}
 			}
 		}.start();
